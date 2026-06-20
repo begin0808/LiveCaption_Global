@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <div class="logo">
+        <span class="pulse"></span>
+        <h1>LiveCaption Studio</h1>
+      </div>
+      <p class="subtitle">即時影片語音翻譯字幕</p>
+    </div>
+
+    <div class="status-container">
+      <div class="status-item">
+        <span class="label">連線狀態:</span>
+        <span id="connection-status" class="status offline">未連線</span>
+      </div>
+      <div class="status-item">
+        <span class="label">擷取狀態:</span>
+        <span id="capture-status" class="status inactive">未啟動</span>
+      </div>
+    </div>
+
+    <div class="section-title">控制面板</div>
+    <div class="control-group" style="margin-bottom: 12px;">
+      <button id="toggle-btn" class="btn btn-start">啟動即時字幕</button>
+    </div>
+    
+    <div class="input-group" style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; background: rgba(255,255,255,0.03); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+      <input type="checkbox" id="show-bilingual" checked style="width: auto; margin: 0; cursor: pointer;">
+      <label for="show-bilingual" style="margin: 0; cursor: pointer; font-size: 13px; font-weight: 600;">顯示雙語字幕 (中文 + 原文)</label>
+    </div>
+
+    <div class="input-group" style="margin-bottom: 16px;">
+      <label for="source-lang">影片來源語言</label>
+      <select id="source-lang" style="cursor: pointer;">
+        <option value="auto">自動偵測 (Auto)</option>
+        <option value="zh-TW">繁體中文 (Traditional Chinese)</option>
+        <option value="zh-CN">簡體中文 (Simplified Chinese)</option>
+        <option value="en">英文 (English)</option>
+        <option value="ja">日文 (Japanese)</option>
+        <option value="ko">韓文 (Korean)</option>
+      </select>
+    </div>
+
+    <div class="section-title">本機翻譯設定 (Ollama)</div>
+    <div class="input-group">
+      <label for="ollama-url">Ollama 伺服器網址</label>
+      <input type="text" id="ollama-url" value="http://localhost:11434" placeholder="http://localhost:11434">
+    </div>
+
+    <div class="input-group">
+      <label for="model-name">翻譯模型名稱</label>
+      <input type="text" id="model-name" value="qwen2.5:3b-instruct" placeholder="qwen2.5:3b-instruct">
+    </div>
+
+    <div class="section-title">雲端翻譯備用 (選填)</div>
+    <div class="input-group">
+      <label for="deepseek-key">DeepSeek API 金鑰</label>
+      <input type="password" id="deepseek-key" placeholder="sk-...">
+    </div>
+    <div class="section-title">字幕外觀設定</div>
+    <div class="input-group" style="display: flex; gap: 12px; margin-bottom: 16px;">
+      <div style="flex: 1;">
+        <label for="bg-color">底框顏色</label>
+        <input type="color" id="bg-color" value="#0a0f19">
+      </div>
+      <div style="flex: 1;">
+        <label for="text-color">文字顏色</label>
+        <input type="color" id="text-color" value="#ffffff">
+      </div>
+    </div>
+
+    <div class="section-title">進階語音切分設定 (VAD)</div>
+    <div class="input-group">
+      <label for="min-silence">斷句靜音時間: <span id="min-silence-val">0.5</span> 秒</label>
+      <input type="range" id="min-silence" min="0.2" max="1.2" step="0.1" value="0.5" style="width: 100%; margin: 4px 0;">
+    </div>
+    <div class="input-group">
+      <label for="max-speech">單句最長上限: <span id="max-speech-val">6.0</span> 秒</label>
+      <input type="range" id="max-speech" min="2.0" max="12.0" step="0.5" value="6.0" style="width: 100%; margin: 4px 0;">
+    </div>
+    
+    <div class="footer">
+      <p>100% 離線隱私保護 • Studio0808</p>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

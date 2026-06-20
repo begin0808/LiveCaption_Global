@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Studio0808 LiveCaption",
+  "version": "1.0.0",
+  "description": "即時影片語音翻譯雙語字幕外掛 (100% 本機與隱私)",
+  "permissions": [
+    "tabCapture",
+    "offscreen",
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ]
+}

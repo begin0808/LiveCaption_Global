@@ -1,0 +1,18 @@
+# Python Virtual Environment
+backend/.venv/
+backend/__pycache__/
+backend/build/
+backend/dist/
+backend/*.spec
+
+# SenseVoice model directory and ONNX files
+backend/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-int8-2024-07-17/
+backend/silero_vad.onnx
+
+# 會議/影片逐字稿紀錄與測試暫存檔
+transcripts/
+backend/dummy_test.wav
+
+# Local OS files
+.DS_Store
+Thumbs.db
