@@ -1339,11 +1339,77 @@
   <!-- Footer -->
   <footer>
     <div class="container">
-      <p>&copy; 2026 Studio0808 智造實驗室. All rights reserved. <a href="https://mail.google.com/mail/?view=cm&fs=1&to=begin0808@gmail.com" target="_blank" style="color: var(--accent-color); text-decoration: none; font-weight: 600; margin-left: 8px;">✉ 寫信給我</a></p>
+      <p><span data-i18n="footer-text">&copy; 2026 Studio0808 智造實驗室. All rights reserved. </span><a href="https://mail.google.com/mail/?view=cm&fs=1&to=begin0808@gmail.com" target="_blank" style="color: var(--accent-color); text-decoration: none; font-weight: 600; margin-left: 8px;" data-i18n="footer-contact">✉ 寫信給我</a></p>
     </div>
   </footer>
 
+  <!-- Load translation lookup table -->
+  <script src="translations.js"></script>
   <script>
+    // i18n Switcher logic
+    function switchDocLanguage(lang) {
+      const elements = document.querySelectorAll('[data-i18n]');
+      elements.forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (manualTranslations[lang] && manualTranslations[lang][key]) {
+          const val = manualTranslations[lang][key];
+          if (val.includes('<') && val.includes('>')) {
+            el.innerHTML = val;
+          } else {
+            el.textContent = val;
+          }
+        }
+      });
+
+      // Update lang attribute on html tag
+      document.documentElement.setAttribute('lang', lang);
+
+      // Update window document title
+      if (lang === 'zh-TW') {
+        document.title = "即時字幕 - Studio0808";
+      } else if (lang === 'zh-CN') {
+        document.title = "即时字幕 - Studio0808";
+      } else if (lang === 'en') {
+        document.title = "Real-Time Subtitles - Studio0808";
+      } else if (lang === 'ja') {
+        document.title = "リアルタイム字幕 - Studio0808";
+      } else if (lang === 'ko') {
+        document.title = "실시간 자막 - Studio0808";
+      }
+
+      // Keep user choice
+      localStorage.setItem('doc-language', lang);
+    }
+
+    // Set select change listener
+    document.addEventListener('DOMContentLoaded', () => {
+      const select = document.getElementById('doc-lang-select');
+      if (select) {
+        select.addEventListener('change', (e) => {
+          switchDocLanguage(e.target.value);
+        });
+
+        let savedLang = localStorage.getItem('doc-language');
+        if (!savedLang) {
+          const browserLang = navigator.language || navigator.userLanguage;
+          if (browserLang.startsWith('zh-CN')) {
+            savedLang = 'zh-CN';
+          } else if (browserLang.startsWith('ja')) {
+            savedLang = 'ja';
+          } else if (browserLang.startsWith('ko')) {
+            savedLang = 'ko';
+          } else if (browserLang.startsWith('zh') || browserLang.startsWith('tw')) {
+            savedLang = 'zh-TW';
+          } else {
+            savedLang = 'zh-TW'; // Default to zh-TW
+          }
+        }
+        
+        select.value = savedLang;
+        switchDocLanguage(savedLang);
+      }
+    });
+
     // Demo Interactive script
     function changeDemoSize(size) {
       const container = document.getElementById('demo-caption-container');
