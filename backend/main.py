@@ -46,6 +46,8 @@ asr_recognizer = None
 
 def init_models():
     global vad_detector, asr_recognizer
+    if vad_detector is not None and asr_recognizer is not None:
+        return
     
     if not os.path.exists(VAD_MODEL_PATH):
         raise FileNotFoundError(f"找不到 VAD 模型: {VAD_MODEL_PATH}，請先執行 download_models.py")
@@ -74,10 +76,34 @@ def init_models():
     )
     print("所有離線 AI 模型載入成功！")
 
+# 追蹤閒置連線與釋放記憶體/顯存相關變數
+active_connections = 0
+last_active_time = None
+
+async def monitor_idle_timeout():
+    global asr_recognizer, vad_detector, active_connections, last_active_time
+    import gc
+    import time
+    # 閒置超時時間設定為 10 分鐘 (600 秒)
+    IDLE_TIMEOUT = 600
+    
+    while True:
+        await asyncio.sleep(30)  # 每 30 秒檢查一次
+        if active_connections == 0 and last_active_time is not None:
+            elapsed = time.time() - last_active_time
+            if elapsed >= IDLE_TIMEOUT and asr_recognizer is not None:
+                print(f"後端閒置已達 {IDLE_TIMEOUT // 60} 分鐘，開始主動釋放 AI 模型資源...")
+                asr_recognizer = None
+                vad_detector = None
+                gc.collect()
+                print("後端 AI 模型資源釋放完成！")
+
 @app.on_event("startup")
 def startup_event():
     try:
         init_models()
+        # 啟動閒置監控工作
+        asyncio.create_task(monitor_idle_timeout())
     except Exception as e:
         print(f"啟動初始化失敗: {e}")
 
@@ -186,9 +212,16 @@ async def translate_text(text: str, target_lang: str, ollama_url: str, model_nam
 
 @app.websocket("/stream")
 async def websocket_endpoint(websocket: WebSocket):
+    global active_connections, asr_recognizer, vad_detector
     await websocket.accept()
-    print("WebSocket 客戶端已連線。")
+    active_connections += 1
+    print(f"WebSocket 客戶端已連線。當前連線數: {active_connections}")
     
+    # 確保模型已載入
+    if asr_recognizer is None or vad_detector is None:
+        print("檢測到模型已被釋放，正在重新載入模型...")
+        init_models()
+        
     # 建立會議記錄存檔目錄與檔案
     import datetime
     transcripts_dir = os.path.join(os.path.dirname(BASE_DIR), "transcripts")
@@ -361,6 +394,11 @@ async def websocket_endpoint(websocket: WebSocket):
         print("WebSocket 客戶端已中斷連線。")
     except Exception as e:
         print(f"WebSocket 發生錯誤: {e}")
+    finally:
+        active_connections = max(0, active_connections - 1)
+        import time
+        last_active_time = time.time()
+        print(f"WebSocket 客戶端已中斷連線。當前連線數: {active_connections}")
 
 if __name__ == "__main__":
     import uvicorn

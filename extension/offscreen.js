@@ -4,6 +4,8 @@ let playbackContext = null;
 let processor = null;
 let ws = null;
 let config = {};
+let reconnectTimer = null;
+let reconnectDelay = 1000;
 
 chrome.runtime.onMessage.addListener(async (message) => {
   if (message.target !== 'offscreen') return;
@@ -98,11 +100,14 @@ async function startRecording(streamId) {
 }
 
 function connectWebSocket() {
+  if (reconnectTimer) clearTimeout(reconnectTimer);
+  
   // Hardcoded to localhost backend (as we want offline/local security)
   ws = new WebSocket('ws://127.0.0.1:8000/stream');
   
   ws.onopen = () => {
     console.log("WebSocket backend connected successfully.");
+    reconnectDelay = 1000; // Reset delay
     chrome.runtime.sendMessage({
       target: 'background',
       type: 'websocket-connected'
@@ -134,6 +139,15 @@ function connectWebSocket() {
       target: 'background',
       type: 'websocket-disconnected'
     });
+    
+    // Attempt auto-reconnect if capture is active
+    if (mediaStream) {
+      console.log(`WebSocket disconnected. Retrying in ${reconnectDelay / 1000}s...`);
+      reconnectTimer = setTimeout(() => {
+        reconnectDelay = Math.min(reconnectDelay * 2, 16000);
+        connectWebSocket();
+      }, reconnectDelay);
+    }
   };
   
   ws.onerror = (err) => {
@@ -163,6 +177,12 @@ window.addEventListener('unload', () => {
 
 function cleanup() {
   console.log("Cleaning up offscreen contexts...");
+  
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
+  reconnectDelay = 1000;
   
   if (processor) {
     try {
