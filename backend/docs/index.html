@@ -11,17 +11,17 @@
   
   <style>
     :root {
-      --bg-primary: #0a0f1d;
-      --bg-secondary: #111827;
-      --bg-tertiary: #1f2937;
-      --text-primary: #f3f4f6;
-      --text-secondary: #9ca3af;
-      --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
-      --accent-color: #6366f1;
-      --accent-color-light: #a855f7;
-      --accent-glow: rgba(99, 102, 241, 0.15);
-      --glass-bg: rgba(17, 24, 39, 0.7);
-      --glass-border: rgba(255, 255, 255, 0.08);
+      --bg-primary: #f4f7fa; /* 陽光清新淺灰藍 */
+      --bg-secondary: #ffffff; /* 純白背景 */
+      --bg-tertiary: #eef2f6; /* 卡片與側欄底色 */
+      --text-primary: #1e293b; /* 深石板灰 */
+      --text-secondary: #64748b; /* 涼爽灰色 */
+      --accent-gradient: linear-gradient(135deg, #0284c7 0%, #0d9488 50%, #10b981 100%); /* 蔚藍到翠綠漸層 */
+      --accent-color: #0284c7; /* 蔚藍 */
+      --accent-color-light: #10b981; /* 翠綠 */
+      --accent-glow: rgba(2, 132, 199, 0.08);
+      --glass-bg: rgba(255, 255, 255, 0.85);
+      --glass-border: rgba(0, 0, 0, 0.06);
       --font-heading: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -44,8 +44,8 @@
       line-height: 1.6;
       overflow-x: hidden;
       background-image: 
-        radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.08) 0%, transparent 45%);
+        radial-gradient(circle at 10% 20%, rgba(2, 132, 199, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.06) 0%, transparent 45%);
       background-attachment: fixed;
     }
 
@@ -57,12 +57,12 @@
       background: var(--bg-primary);
     }
     ::-webkit-scrollbar-thumb {
-      background: var(--bg-tertiary);
+      background: #cbd5e1;
       border-radius: 5px;
       border: 2px solid var(--bg-primary);
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: var(--text-secondary);
+      background: #94a3b8;
     }
 
     /* Container layout */
@@ -74,7 +74,7 @@
 
     /* Header & Navigation */
     header {
-      background: rgba(10, 15, 29, 0.8);
+      background: rgba(255, 255, 255, 0.8);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--glass-border);
@@ -127,12 +127,12 @@
 
     nav a:hover, nav a.active {
       color: var(--text-primary);
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(0, 0, 0, 0.04);
     }
 
     /* Hero Section */
     .hero {
-      padding: 80px 0 60px;
+      padding: 80px 0 40px;
       text-align: center;
       position: relative;
     }
@@ -140,10 +140,10 @@
     .hero-badge {
       display: inline-block;
       padding: 6px 16px;
-      background: rgba(99, 102, 241, 0.1);
-      border: 1px solid rgba(99, 102, 241, 0.3);
+      background: rgba(2, 132, 199, 0.08);
+      border: 1px solid rgba(2, 132, 199, 0.2);
       border-radius: 100px;
-      color: #818cf8;
+      color: #0284c7;
       font-size: 13px;
       font-weight: 600;
       margin-bottom: 24px;
@@ -153,9 +153,9 @@
     }
 
     @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
-      70% { box-shadow: 0 0 0 8px rgba(99, 102, 241, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+      0% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.2); }
+      70% { box-shadow: 0 0 0 8px rgba(2, 132, 199, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0); }
     }
 
     .hero h1 {
@@ -165,6 +165,7 @@
       line-height: 1.2;
       margin-bottom: 20px;
       letter-spacing: -1px;
+      color: #0f172a;
     }
 
     .hero h1 span {
@@ -202,28 +203,90 @@
     .btn-primary {
       background: var(--accent-gradient);
       color: white;
-      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+      box-shadow: 0 4px 20px rgba(2, 132, 199, 0.25);
     }
 
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 25px rgba(99, 102, 241, 0.5);
+      box-shadow: 0 6px 25px rgba(2, 132, 199, 0.4);
     }
 
     .btn-secondary {
-      background: rgba(255, 255, 255, 0.05);
+      background: #ffffff;
       color: var(--text-primary);
       border: 1px solid var(--glass-border);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
     }
 
     .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--bg-tertiary);
       transform: translateY(-2px);
+    }
+
+    /* Scenarios Section */
+    .scenarios-section {
+      padding: 50px 0;
+    }
+
+    .scenarios-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .scenario-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      transition: var(--transition-smooth);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .scenario-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(2, 132, 199, 0.08);
+      border-color: rgba(2, 132, 199, 0.2);
+    }
+
+    .scenario-icon {
+      width: 44px;
+      height: 44px;
+      background: rgba(16, 185, 129, 0.08);
+      color: var(--accent-color-light);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .scenario-icon svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .scenario-card h3 {
+      font-family: var(--font-heading);
+      font-size: 17px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+
+    .scenario-card p {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      line-height: 1.5;
     }
 
     /* Features Grid */
     .features-section {
-      padding: 40px 0 80px;
+      padding: 60px 0 80px;
     }
 
     .section-title-wrapper {
@@ -235,6 +298,7 @@
       font-family: var(--font-heading);
       font-size: 32px;
       font-weight: 700;
+      color: #0f172a;
       margin-bottom: 12px;
     }
 
@@ -251,12 +315,11 @@
     }
 
     .feature-card {
-      background: var(--glass-bg);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      background: var(--bg-secondary);
       border: 1px solid var(--glass-border);
       border-radius: 16px;
       padding: 32px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
       transition: var(--transition-smooth);
       position: relative;
       overflow: hidden;
@@ -276,8 +339,8 @@
 
     .feature-card:hover {
       transform: translateY(-6px);
-      border-color: rgba(255, 255, 255, 0.15);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      border-color: rgba(2, 132, 199, 0.15);
+      box-shadow: 0 12px 30px rgba(2, 132, 199, 0.06);
     }
 
     .feature-card:hover::before {
@@ -288,7 +351,7 @@
       width: 48px;
       height: 48px;
       border-radius: 10px;
-      background: rgba(99, 102, 241, 0.1);
+      background: rgba(2, 132, 199, 0.08);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -306,6 +369,7 @@
       font-size: 20px;
       font-weight: 600;
       margin-bottom: 12px;
+      color: #0f172a;
     }
 
     .feature-card p {
@@ -335,7 +399,7 @@
       top: 20px;
       bottom: 20px;
       width: 2px;
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(0, 0, 0, 0.05);
     }
 
     .step-item {
@@ -353,7 +417,7 @@
       width: 56px;
       height: 56px;
       border-radius: 50%;
-      background: var(--bg-tertiary);
+      background: #f8fafc;
       border: 2px solid var(--glass-border);
       display: flex;
       align-items: center;
@@ -361,7 +425,7 @@
       font-family: var(--font-heading);
       font-size: 20px;
       font-weight: 700;
-      color: var(--text-primary);
+      color: #475569;
       z-index: 2;
       flex-shrink: 0;
       transition: var(--transition-smooth);
@@ -370,7 +434,7 @@
     .step-item:hover .step-badge {
       border-color: var(--accent-color);
       color: var(--accent-color);
-      background: rgba(99, 102, 241, 0.1);
+      background: rgba(2, 132, 199, 0.08);
       box-shadow: 0 0 15px var(--accent-glow);
     }
 
@@ -381,12 +445,14 @@
       border-radius: 12px;
       padding: 24px;
       flex-grow: 1;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.01);
     }
 
     .step-content h3 {
       font-family: var(--font-heading);
       font-size: 18px;
       font-weight: 600;
+      color: #0f172a;
       margin-bottom: 12px;
       display: flex;
       align-items: center;
@@ -400,7 +466,7 @@
     }
 
     .step-details {
-      background: rgba(0, 0, 0, 0.2);
+      background: rgba(0, 0, 0, 0.02);
       border-radius: 8px;
       padding: 16px;
       border-left: 3px solid var(--accent-color);
@@ -411,7 +477,7 @@
     }
 
     .step-details li {
-      font-size: 13px;
+      font-size: 13.5px;
       color: var(--text-primary);
       margin-bottom: 8px;
       padding-left: 16px;
@@ -452,6 +518,7 @@
       font-family: var(--font-heading);
       font-size: 24px;
       margin-bottom: 16px;
+      color: #0f172a;
     }
 
     .config-text p {
@@ -469,12 +536,12 @@
       width: 40px;
       height: 40px;
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.03);
+      background: rgba(2, 132, 199, 0.05);
       border: 1px solid var(--glass-border);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--accent-color-light);
+      color: var(--accent-color);
       flex-shrink: 0;
     }
 
@@ -482,36 +549,39 @@
       font-size: 16px;
       font-weight: 600;
       margin-bottom: 4px;
+      color: #0f172a;
     }
 
     .config-item-text p {
-      font-size: 13px;
+      font-size: 13.5px;
       color: var(--text-secondary);
       margin-bottom: 0;
     }
 
     .config-visual {
       flex: 1 1 400px;
-      background: radial-gradient(100% 100% at 50% 0%, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.2) 100%);
+      background: radial-gradient(100% 100% at 50% 0%, rgba(255, 255, 255, 0.9) 0%, rgba(240, 244, 248, 0.6) 100%);
       border: 1px solid var(--glass-border);
       border-radius: 20px;
       padding: 32px;
       position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
     }
 
     /* Mock Subtitle Window Demo */
     .mock-caption-window {
-      background: rgba(10, 15, 25, 0.85);
+      background: rgba(15, 23, 42, 0.92); /* 深色字幕底框模擬 */
       border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 12px;
       padding: 16px 20px;
       text-align: center;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
       margin-bottom: 20px;
     }
 
     .mock-line {
       margin-bottom: 8px;
+      transition: all 0.3s ease;
     }
     
     .mock-line:last-child {
@@ -524,26 +594,29 @@
     }
 
     .mock-raw {
-      font-size: 12px;
+      font-size: 12.5px;
       color: rgba(220, 225, 235, 0.75);
       margin-bottom: 2px;
+      transition: all 0.2s ease;
     }
 
     .mock-zh {
       font-size: 17px;
-      color: #818cf8;
+      color: #38bdf8;
       font-weight: 700;
+      transition: all 0.2s ease;
     }
 
     .mock-zh-latest {
       font-size: 18px;
       color: #ffffff;
       font-weight: 700;
+      transition: all 0.2s ease;
     }
 
     /* Interactive Size Demo Control */
     .interactive-demo {
-      background: rgba(255, 255, 255, 0.02);
+      background: rgba(0, 0, 0, 0.02);
       border: 1px solid var(--glass-border);
       border-radius: 12px;
       padding: 20px;
@@ -560,11 +633,12 @@
       flex: 1;
       padding: 8px;
       border: 1px solid var(--glass-border);
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(0, 0, 0, 0.03);
       color: var(--text-secondary);
       border-radius: 6px;
       cursor: pointer;
       font-size: 12px;
+      font-weight: 500;
       transition: var(--transition-smooth);
     }
 
@@ -598,14 +672,15 @@
     }
 
     .faq-card:hover {
-      border-color: rgba(99, 102, 241, 0.25);
+      border-color: rgba(2, 132, 199, 0.25);
+      box-shadow: 0 8px 20px rgba(2, 132, 199, 0.04);
     }
 
     .faq-card h4 {
       font-size: 17px;
       font-weight: 600;
       margin-bottom: 12px;
-      color: #818cf8;
+      color: var(--accent-color);
       display: flex;
       align-items: center;
       gap: 8px;
@@ -617,14 +692,25 @@
       line-height: 1.6;
     }
 
+    .faq-card ol {
+      margin-left: 20px;
+      margin-top: 8px;
+      font-size: 13.5px;
+      color: var(--text-primary);
+    }
+
+    .faq-card ol li {
+      margin-bottom: 4px;
+    }
+
     .alert-box {
       margin-top: 12px;
       padding: 12px 16px;
       border-radius: 6px;
-      background: rgba(239, 68, 68, 0.08);
-      border: 1px solid rgba(239, 68, 68, 0.2);
+      background: rgba(239, 68, 68, 0.05);
+      border: 1px solid rgba(239, 68, 68, 0.15);
       font-size: 13px;
-      color: #f87171;
+      color: #dc2626;
     }
 
     /* Footer */
@@ -634,16 +720,11 @@
       border-top: 1px solid var(--glass-border);
       color: var(--text-secondary);
       font-size: 13px;
+      background: #f8fafc;
     }
 
     footer p {
       margin-bottom: 10px;
-    }
-
-    footer a {
-      color: var(--text-primary);
-      text-decoration: none;
-      font-weight: 500;
     }
 
     /* Responsive */
@@ -679,9 +760,9 @@
   <svg style="position: absolute; width: 0; height: 0;" aria-hidden="true" focusable="false">
     <defs>
       <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#6366f1" />
-        <stop offset="50%" stop-color="#a855f7" />
-        <stop offset="100%" stop-color="#ec4899" />
+        <stop offset="0%" stop-color="#0284c7" />
+        <stop offset="50%" stop-color="#0d9488" />
+        <stop offset="100%" stop-color="#10b981" />
       </linearGradient>
     </defs>
   </svg>
@@ -697,6 +778,7 @@
       </div>
       <nav>
         <ul>
+          <li><a href="#scenarios">應用場景</a></li>
           <li><a href="#features">系統特色</a></li>
           <li><a href="#steps">安裝與啟動</a></li>
           <li><a href="#config">設定說明</a></li>
@@ -714,7 +796,79 @@
       <p>Studio0808 LiveCaption 是一套專為瀏覽器影片設計的即時語音識別與雙語字幕翻譯系統。完全在您的本機電腦執行，擁有 100% 的隱私保護與極低延遲的渲染速度。</p>
       <div class="hero-buttons">
         <a href="#steps" class="btn btn-primary">開始使用</a>
-        <a href="#features" class="btn btn-secondary">深入了解</a>
+        <a href="#scenarios" class="btn btn-secondary">應用場景</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scenarios Section (NEW) -->
+  <section id="scenarios" class="scenarios-section">
+    <div class="container">
+      <div class="section-title-wrapper">
+        <h2 class="section-title">多元應用場景</h2>
+        <p class="section-subtitle">完美融入您的工作、學習與娛樂生活</p>
+      </div>
+      
+      <div class="scenarios-grid">
+        <!-- Scenario 1 -->
+        <div class="scenario-card">
+          <div class="scenario-icon">
+            <!-- Graduation / Course Icon -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+              <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
+            </svg>
+          </div>
+          <h3>線上課程與學術講座</h3>
+          <p>觀看 Coursera、Udemy、YouTube 上的無字幕國外教學影片時，提供即時繁中翻譯，幫助快速掌握關鍵字與專業內容。</p>
+        </div>
+
+        <!-- Scenario 2 -->
+        <div class="scenario-card">
+          <div class="scenario-icon">
+            <!-- Headphones / Learning Icon -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+              <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+            </svg>
+          </div>
+          <h3>外語聽力與口說練習</h3>
+          <p>切換為「僅顯示原文」模式，只顯示純英文/日文字幕進行聽力盲聽訓練，遇到聽不懂的段落隨時切換回雙語對照，效果加倍。</p>
+        </div>
+
+        <!-- Scenario 3 -->
+        <div class="scenario-card">
+          <div class="scenario-icon">
+            <!-- Film Icon -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/>
+              <line x1="7" y1="2" x2="7" y2="22"/>
+              <line x1="17" y1="2" x2="17" y2="22"/>
+              <line x1="2" y1="12" x2="22" y2="12"/>
+              <line x1="2" y1="7" x2="7" y2="7"/>
+              <line x1="2" y1="17" x2="7" y2="17"/>
+              <line x1="17" y1="17" x2="22" y2="17"/>
+              <line x1="17" y1="7" x2="22" y2="7"/>
+            </svg>
+          </div>
+          <h3>國外影音與影劇追星</h3>
+          <p>支援無字幕的國外最新串流影音（如直播、海外新聞等），提供本機極速翻譯，讓您無痛看懂第一手生肉影片。</p>
+        </div>
+
+        <!-- Scenario 4 -->
+        <div class="scenario-card">
+          <div class="scenario-icon">
+            <!-- Users / Meeting Icon -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <h3>網頁視訊會議逐字稿</h3>
+          <p>在瀏覽器進行 Google Meet、Teams 跨國會議時，即時把發言渲染成雙語字幕，並自動在背景存檔為完整的 Markdown 會議紀錄。</p>
+        </div>
       </div>
     </div>
   </section>
@@ -777,7 +931,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polygon points="12 2 2 7 12 12 22 7 12 2"/>
               <polyline points="2 17 12 22 22 17"/>
-              <polyline points="2 12 12 17 22 12"/>
+              <polyline points="2 12 17 22 12"/>
             </svg>
           </div>
           <h3>高顏值字幕懸浮視窗</h3>
@@ -949,7 +1103,7 @@
               <p>提供三種模式彈性切換：<br>
                 1. <strong>雙語對照</strong>：同時顯示「識別出的原文」與「翻譯出的中文字幕」。<br>
                 2. <strong>僅顯示翻譯</strong>：隱藏原文，畫面只單獨顯示中文翻譯，視覺最為清爽。<br>
-                3. <strong>僅顯示原文</strong>：<strong>不顯示中文翻譯，只保留影片的原始語音字幕</strong>（例如觀看英文影片時作為純英文聽力輔助），此時原文會自動以主字型大小顯示。</p>
+                3. <strong>僅顯示原文</strong>：不顯示中文翻譯，只保留影片的原始語音字幕（例如觀看英文影片時作為純英文聽力輔助），此時原文會自動以主字型大小顯示。</p>
             </div>
           </div>
         </div>
@@ -1038,10 +1192,13 @@
         <div class="faq-card">
           <h4>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
-            問題 3：字幕擋住了影片底部的操作按鈕？
+            問題 3：彈出 Cannot capture a tab with an active stream 錯誤，或是啟動失敗？
           </h4>
           <p>
-            字幕懸浮框設計為<strong>可以任意拖曳</strong>。您可以使用滑鼠按住字幕框將其移到螢幕上的任何位置。此外，<strong>雙擊 (Double Click)</strong> 字幕框，它將會立刻恢復到螢幕底部中央的預設位置。
+            這是因為 Chrome 判定該影片分頁已經有音訊擷取程序正在運行。這通常是因為外掛背景腳本自動休眠重啟、狀態不同步導致。<br>
+            <strong>解決方法：</strong><br>
+            1. <strong>重新整理影片網頁：</strong>直接按下 <code>F5</code> 重新整理播放影片的網頁，這會強制釋放該分頁被佔用的所有音軌。<br>
+            2. <strong>重載擴充功能：</strong>在 <code>chrome://extensions/</code> 中點選 Studio0808 LiveCaption 的「重新整理」圖示，徹底重啟背景程序即可。
           </p>
         </div>
 
@@ -1049,17 +1206,34 @@
         <div class="faq-card">
           <h4>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
-            問題 4：翻譯顯示不出來，或是速度極慢？
+            問題 4：如何申請與配置 DeepSeek 雲端翻譯金鑰 (API Key)？
           </h4>
           <p>
-            如果您在設定中啟動了 Ollama 本機翻譯：<br>
-            1. 請確認您的本機已啟動 Ollama 服務，且可以在瀏覽器訪問 <code>http://localhost:11434</code>。<br>
-            2. 請確認您已經使用命令行下載了對應的模型。例如：<code>ollama pull qwen2.5:3b-instruct</code>。<br>
-            3. 如果您的電腦沒有獨立顯示卡 (NVIDIA GPU)，CPU 運行 Qwen 3B 模型速度會較慢，這時建議點擊設定，填入您的 <strong>DeepSeek API Key</strong> 切換成雲端 API 翻譯，速度極快且精準。
+            使用 DeepSeek 雲端翻譯可以極低成本取得極精準的雙語對照。請依以下步驟申請：
           </p>
-          <div class="alert-box">
-            <strong>注意：</strong>使用 DeepSeek Cloud API 需要您的電腦處於聯網狀態，並且金鑰餘額足夠。
-          </div>
+          <ol>
+            <li><strong>註冊/登入開發者平台</strong>：造訪 <a href="https://platform.deepseek.com/" target="_blank" style="color:#0284c7; text-decoration:none; font-weight:600;">DeepSeek 開放平台</a>。您可以透過手機註冊或 Google 帳號快速登入。</li>
+            <li><strong>帳戶充值 (Top Up)</strong>：進入後台後，點擊左側選單的 <strong>"Top up"</strong>。其 Token 價格極低（100萬 Tokens 僅需約 0.14~0.28 美元），充值最低金額（如 1~5 美元）即可供日常影片翻譯使用極長時間。</li>
+            <li><strong>建立金鑰 (Create API Key)</strong>：點擊左側選單的 <strong>"API Keys"</strong>，然後點擊 <strong>"Create new API key"</strong>。輸入金鑰名稱並點擊確定。</li>
+            <li><strong>複製金鑰</strong>：複製系統產生的以 <code>sk-</code> 開頭的金鑰。基於安全限制，該金鑰只會顯示一次，請務必當下複製保存。</li>
+            <li><strong>配置到外掛</strong>：點擊 Chrome 的 LiveCaption 外掛圖示，在「DeepSeek API 金鑰」欄位貼上剛才複製的金鑰，即可自動啟用雲端翻譯。</li>
+          </ol>
+        </div>
+
+        <!-- Q5 (Roadmap Memo) -->
+        <div class="faq-card">
+          <h4>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+            備忘與未來規劃：開發方案 B「桌面獨立程式」版本？
+          </h4>
+          <p>
+            目前我們採用「Chrome 外掛 (擷取與顯示) + 本機 Python (AI 大腦)」的雙軌架構。若未來您希望脫離 Chrome 瀏覽器、為 PotPlayer 等本機軟體或 Teams/Zoom 視訊程式提供即時字幕，可以規畫另外開發為獨立桌面程式：
+          </p>
+          <ol>
+            <li><strong>系統音訊錄製 (WASAPI Loopback)</strong>：捨棄瀏覽器專用 API，改在 Python 中使用 Windows WASAPI 環回機制錄音，這樣便能直接擷取電腦喇叭播放的所有聲音。</li>
+            <li><strong>獨立桌面懸浮視窗 (PyQt6 / PySide6)</strong>：在 Python 建立半透明、無邊框、永遠置頂 (Always on Top) 的桌面 UI 字幕視窗。</li>
+            <li><strong>特性評估</strong>：此方案將可支援全電腦所有音軌，但需要防範其他系統通知雜音（例如通訊軟體叮咚聲）對辨識的干擾。本項目將作爲未來獨立產品另外開發。</li>
+          </ol>
         </div>
       </div>
     </div>
@@ -1069,7 +1243,7 @@
   <footer>
     <div class="container">
       <p>&copy; 2026 Studio0808 LiveCaption 即時語音字幕與翻譯系統. All Rights Reserved.</p>
-      <p>極簡 | 隱私 | 離線智慧</p>
+      <p>清新陽光 | 隱私保護 | 離線智慧</p>
     </div>
   </footer>
 
@@ -1107,7 +1281,7 @@
       const lineHist2 = document.getElementById('demo-line-hist-2');
       
       // Reset buttons
-      const buttons = document.querySelectorAll('.interactive-controls:last-of-type .demo-btn');
+      const buttons = document.querySelectorAll('.interactive-controls:nth-of-type(2) .demo-btn');
       buttons.forEach(btn => btn.classList.remove('active'));
       
       // Find and active clicked button
@@ -1178,13 +1352,13 @@
         hist1Zh.style.display = 'none';
         hist1Raw.style.display = 'block';
         hist1Raw.style.fontSize = '17px';
-        hist1Raw.style.color = '#818cf8';
+        hist1Raw.style.color = '#38bdf8'; // sky blue
         hist1Raw.style.fontWeight = '700';
         
         hist2Zh.style.display = 'none';
         hist2Raw.style.display = 'block';
         hist2Raw.style.fontSize = '17px';
-        hist2Raw.style.color = '#818cf8';
+        hist2Raw.style.color = '#38bdf8'; // sky blue
         hist2Raw.style.fontWeight = '700';
       }
     }
