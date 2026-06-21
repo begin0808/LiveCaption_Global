@@ -2,6 +2,8 @@
 
 [English Version](README_EN.md) | [繁體中文](README.md)
 
+👉 **線上多國語言手冊 (Live Manual)**: [https://begin0808.github.io/LiveCaption/](https://begin0808.github.io/LiveCaption/)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Platform: Windows | macOS](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS-brightgreen.svg)](#)
 [![ASR: SenseVoice](https://img.shields.io/badge/ASR-SenseVoice--Small-orange.svg)](#)
