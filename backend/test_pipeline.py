@@ -41,9 +41,9 @@ def test_pipeline():
         vad_config = sherpa_onnx.VadModelConfig(
             silero_vad=sherpa_onnx.SileroVadModelConfig(
                 model=VAD_MODEL_PATH,
-                threshold=0.5,
+                threshold=0.4,
                 min_silence_duration=0.5,
-                min_speech_duration=0.25,
+                min_speech_duration=0.15,
                 max_speech_duration=10.0,
             ),
             sample_rate=16000,

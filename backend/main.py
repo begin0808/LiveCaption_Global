@@ -58,9 +58,9 @@ def init_models():
     vad_config = sherpa_onnx.VadModelConfig(
         silero_vad=sherpa_onnx.SileroVadModelConfig(
             model=VAD_MODEL_PATH,
-            threshold=0.5,
+            threshold=0.4,
             min_silence_duration=0.5,  # 0.5 秒靜音判定為說話結束
-            min_speech_duration=0.25,
+            min_speech_duration=0.15,
             max_speech_duration=10.0,  # 最長單句 10 秒強迫切分
         ),
         sample_rate=16000,
@@ -243,9 +243,9 @@ async def websocket_endpoint(websocket: WebSocket):
     vad_config = sherpa_onnx.VadModelConfig(
         silero_vad=sherpa_onnx.SileroVadModelConfig(
             model=VAD_MODEL_PATH,
-            threshold=0.5,
+            threshold=0.4,
             min_silence_duration=0.5,
-            min_speech_duration=0.25,
+            min_speech_duration=0.15,
             max_speech_duration=10.0,
         ),
         sample_rate=16000,
@@ -284,9 +284,9 @@ async def websocket_endpoint(websocket: WebSocket):
                         vad_config = sherpa_onnx.VadModelConfig(
                             silero_vad=sherpa_onnx.SileroVadModelConfig(
                                 model=VAD_MODEL_PATH,
-                                threshold=0.5,
+                                threshold=0.4,
                                 min_silence_duration=min_silence,
-                                min_speech_duration=0.25,
+                                min_speech_duration=0.15,
                                 max_speech_duration=max_speech,
                             ),
                             sample_rate=16000,
