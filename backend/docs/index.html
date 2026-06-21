@@ -1247,7 +1247,23 @@
           </ol>
         </div>
 
-        <!-- Q5 (Roadmap Memo) -->
+        <!-- Q5 (Mac Support) -->
+        <div class="faq-card">
+          <h4>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+            問題 5：Mac 電腦也可以使用嗎？
+          </h4>
+          <p>
+            <strong>可以！Mac 電腦完全可以使用，但啟動方式與 Windows 略有不同：</strong>
+          </p>
+          <ol>
+            <li><strong>瀏覽器外掛 (Chrome Extension)</strong>：100% 支援。外掛的安裝與使用方式在 Mac Chrome 瀏覽器上與 Windows 完全相同。</li>
+            <li><strong>後端伺服器 (Python Backend)</strong>：發布包中的 <code>.exe</code> 與 <code>.bat</code> 為 Windows 專用。Mac 使用者若要使用，需先安裝 Python 環境，並於終端機執行 <code>pip install -r requirements.txt</code> 安裝依賴，再執行 <code>python main.py</code> 啟動。</li>
+            <li><strong>處理器晶片相容性</strong>：辨識核心對 Mac 的 Intel 晶片與 Apple Silicon (M1/M2/M3) 晶片皆有原生高效能優化，可流暢執行。</li>
+          </ol>
+        </div>
+
+        <!-- Q6 (Roadmap Memo) -->
         <div class="faq-card">
           <h4>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
