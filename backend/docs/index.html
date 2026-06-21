@@ -1370,6 +1370,19 @@
             </ol>
           </p>
         </div>
+
+        <!-- Q7 (Console Developer Errors/Warnings) -->
+        <div class="faq-card">
+          <h4>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+            <span data-i18n="faq7-title">問題 7：在擴充功能管理頁面點擊「錯誤」按鈕，出現 ScriptProcessorNode 警告或 Cannot capture a tab 錯誤？</span>
+          </h4>
+          <p data-i18n="faq7-desc">
+            這是開發者偵錯介面中顯示的狀態，具體原因如下：<br>
+            1. <strong>ScriptProcessorNode is deprecated 警告 (黃色)</strong>：這是 Chrome 瀏覽器的標準開發者提示，告知該音訊處理介面未來將被新標準取代。由於目前此設計在擴充功能後台（Offscreen Document）相容性與穩定性最佳，因此程式繼續採用，此警告<strong>完全不影響字幕正常運作</strong>，請放心忽略。<br>
+            2. <strong>Cannot capture a tab with an active stream 錯誤 (紅色)</strong>：這通常發生在**播放影片時重新載入（Reload）擴充功能**。因為 Chrome 尚未釋放前一次的擷取連線，導致新連線衝突。<strong>解決方法：</strong>請按下 <code>F5</code> 重新整理播放影片的網頁以強制釋放音訊，並在錯誤頁面點選右上角的「全部清除」即可恢復正常。
+          </p>
+        </div>
       </div>
     </div>
   </section>
