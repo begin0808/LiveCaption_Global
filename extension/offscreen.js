@@ -150,7 +150,8 @@ function sendConfigToBackend() {
       deepseek_key: config.deepseekKey,
       min_silence: config.minSilence,
       max_speech: config.maxSpeech,
-      source_lang: config.sourceLang
+      source_lang: config.sourceLang,
+      target_lang: config.targetLang
     }));
   }
 }

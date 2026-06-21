@@ -1126,11 +1126,9 @@
               </svg>
             </div>
             <div class="config-item-text">
-              <h4>字幕顯示模式 (Subtitle Mode)</h4>
-              <p>提供三種模式彈性切換：<br>
-                1. <strong>雙語對照</strong>：同時顯示「識別出的原文」與「翻譯出的中文字幕」。<br>
-                2. <strong>僅顯示翻譯</strong>：隱藏原文，畫面只單獨顯示中文翻譯，視覺最為清爽。<br>
-                3. <strong>僅顯示原文</strong>：不顯示中文翻譯，只保留影片的原始語音字幕（例如觀看英文影片時作為純英文聽力輔助），此時原文會自動以主字型大小顯示。</p>
+              <h4>字幕翻譯語言與雙語對照模式</h4>
+              <p>1. <strong>字幕翻譯語言</strong>：支援切換至繁中、簡中、英文、日文、韓文等多國翻譯語系，預設不選即為「僅顯示原文」模式，直接跳過後端翻譯接口以節省額外負擔並提升 300% 以上之解碼效能。<br>
+                2. <strong>雙語對照模式</strong>：當選取了某種翻譯語言時，勾選雙語對照會同時呈現「原文 + 翻譯文」；取消勾選則只會呈現「翻譯文」。如果翻譯語言選擇「僅顯示原文」，則無論是否勾選皆僅顯示原文。</p>
             </div>
           </div>
         </div>
@@ -1168,11 +1166,11 @@
               <button class="demo-btn" onclick="changeDemoHistory(2)">+ 2 行歷史</button>
             </div>
 
-            <div style="font-size: 12px; font-weight: 600; margin-bottom: 6px; text-align: center;">互動預覽：字幕模式切換</div>
+            <div style="font-size: 12px; font-weight: 600; margin-bottom: 6px; text-align: center;">互動預覽：字幕翻譯與雙語切換</div>
             <div class="interactive-controls">
-              <button class="demo-btn active" onclick="changeDemoMode('bilingual')">雙語對照</button>
-              <button class="demo-btn" onclick="changeDemoMode('translation')">僅中文</button>
-              <button class="demo-btn" onclick="changeDemoMode('raw')">僅原文</button>
+              <button class="demo-btn active" onclick="changeDemoSetting('zh-TW', true)">雙語對照 (繁中)</button>
+              <button class="demo-btn" onclick="changeDemoSetting('zh-TW', false)">僅顯示翻譯</button>
+              <button class="demo-btn" onclick="changeDemoSetting('none', false)">僅顯示原文</button>
             </div>
           </div>
         </div>
@@ -1341,7 +1339,7 @@
       }
     }
 
-    function changeDemoMode(mode) {
+    function changeDemoSetting(targetLang, showBilingual) {
       // Sibling button reset
       const buttons = event.target.parentElement.querySelectorAll('.demo-btn');
       buttons.forEach(btn => btn.classList.remove('active'));
@@ -1365,25 +1363,7 @@
         el.style.fontWeight = '';
       });
       
-      if (mode === 'bilingual') {
-        latestZh.style.display = 'block';
-        latestRaw.style.display = 'block';
-        
-        hist1Zh.style.display = 'block';
-        hist1Raw.style.display = 'block';
-        
-        hist2Zh.style.display = 'block';
-        hist2Raw.style.display = 'block';
-      } else if (mode === 'translation') {
-        latestZh.style.display = 'block';
-        latestRaw.style.display = 'none';
-        
-        hist1Zh.style.display = 'block';
-        hist1Raw.style.display = 'none';
-        
-        hist2Zh.style.display = 'block';
-        hist2Raw.style.display = 'none';
-      } else if (mode === 'raw') {
+      if (targetLang === 'none') {
         // Show only raw text with primary styling
         latestZh.style.display = 'none';
         latestRaw.style.display = 'block';
@@ -1402,6 +1382,26 @@
         hist2Raw.style.fontSize = '15px';
         hist2Raw.style.color = '#38bdf8'; // sky blue
         hist2Raw.style.fontWeight = '700';
+      } else {
+        if (showBilingual) {
+          latestZh.style.display = 'block';
+          latestRaw.style.display = 'block';
+          
+          hist1Zh.style.display = 'block';
+          hist1Raw.style.display = 'block';
+          
+          hist2Zh.style.display = 'block';
+          hist2Raw.style.display = 'block';
+        } else {
+          latestZh.style.display = 'block';
+          latestRaw.style.display = 'none';
+          
+          hist1Zh.style.display = 'block';
+          hist1Raw.style.display = 'none';
+          
+          hist2Zh.style.display = 'block';
+          hist2Raw.style.display = 'none';
+        }
       }
     }
 

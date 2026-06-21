@@ -58,7 +58,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (tabId) {
           chrome.tabs.sendMessage(tabId, {
             type: 'update-subtitle-mode',
-            subtitleMode: message.config.subtitleMode
+            targetLang: message.config.targetLang,
+            showBilingual: message.config.showBilingual
           }).catch(() => {});
         }
       }
@@ -83,15 +84,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // Forward subtitle translation to content script in the active tab
       const tabId = activeTabId;
       if (tabId) {
-        chrome.storage.local.get(['subtitleMode', 'showBilingual'], (result) => {
-          let subtitleMode = result.subtitleMode;
-          if (!subtitleMode) {
-            subtitleMode = result.showBilingual !== false ? 'bilingual' : 'translation';
-          }
+        chrome.storage.local.get(['targetLang', 'showBilingual'], (result) => {
+          const targetLang = result.targetLang || 'none';
+          const showBilingual = result.showBilingual !== false;
           chrome.tabs.sendMessage(tabId, {
             type: 'render-subtitle',
             data: message.data,
-            subtitleMode: subtitleMode
+            targetLang: targetLang,
+            showBilingual: showBilingual
           }).catch(err => {
             console.warn("Failed to send subtitle to content script (tab might have been closed or reloaded):", err);
           });
@@ -119,14 +119,15 @@ async function startCapture(streamId, tabId) {
     await chrome.storage.local.set({ isCapturing: true, activeTabId: tabId });
     
     // 3. Load config from storage
-    const storage = await chrome.storage.local.get(['ollamaUrl', 'modelName', 'deepseekKey', 'minSilence', 'maxSpeech', 'showBilingual', 'sourceLang']);
+    const storage = await chrome.storage.local.get(['ollamaUrl', 'modelName', 'deepseekKey', 'minSilence', 'maxSpeech', 'showBilingual', 'sourceLang', 'targetLang']);
     const config = {
       ollamaUrl: storage.ollamaUrl || 'http://localhost:11434',
       modelName: storage.modelName || 'qwen2.5:3b-instruct',
       deepseekKey: storage.deepseekKey || '',
       minSilence: storage.minSilence !== undefined ? storage.minSilence : 0.5,
       maxSpeech: storage.maxSpeech !== undefined ? storage.maxSpeech : 6.0,
-      sourceLang: storage.sourceLang || 'auto'
+      sourceLang: storage.sourceLang || 'auto',
+      targetLang: storage.targetLang || 'none'
     };
     const showBilingual = storage.showBilingual !== false;
     
@@ -141,17 +142,12 @@ async function startCapture(streamId, tabId) {
     }
     
     // 5. Tell Content Script to show/reset subtitles overlay
-    chrome.storage.local.get(['subtitleMode', 'showBilingual'], (res) => {
-      let subtitleMode = res.subtitleMode;
-      if (!subtitleMode) {
-        subtitleMode = res.showBilingual !== false ? 'bilingual' : 'translation';
-      }
-      chrome.tabs.sendMessage(activeTabId, { 
-        type: 'show-subtitles',
-        subtitleMode: subtitleMode
-      }).catch(() => {
-        // Content script might not be loaded yet, ignoring
-      });
+    chrome.tabs.sendMessage(activeTabId, { 
+      type: 'show-subtitles',
+      targetLang: config.targetLang,
+      showBilingual: showBilingual
+    }).catch(() => {
+      // Content script might not be loaded yet, ignoring
     });
     
     // 6. Tell Offscreen Document to start recording and connect WebSocket

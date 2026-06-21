@@ -158,7 +158,7 @@ function handleFullscreenChange() {
 }
 
 // Render history subtitles based on configurations
-function renderHistorySubtitles(subtitleMode) {
+function renderHistorySubtitles(targetLang, showBilingual) {
   if (!subtitleContainer) return;
   
   subtitleContainer.innerHTML = ''; // Clear previous elements
@@ -172,31 +172,33 @@ function renderHistorySubtitles(subtitleMode) {
       lineWrapper.classList.add('history-line');
     }
     
-    if (subtitleMode === 'bilingual') {
-      // Raw text (English/Japanese) - hidden if equal to zh text
-      if (item.text_raw && item.text_raw !== item.text_zh) {
-        const rawEl = document.createElement('div');
-        rawEl.className = 'studio0808-subtitle-raw-item';
-        rawEl.textContent = item.text_raw;
-        lineWrapper.appendChild(rawEl);
-      }
-      
-      // Translated text (Chinese)
-      const zhEl = document.createElement('div');
-      zhEl.className = 'studio0808-subtitle-zh-item';
-      zhEl.textContent = item.text_zh;
-      lineWrapper.appendChild(zhEl);
-    } else if (subtitleMode === 'raw') {
+    if (targetLang === 'none') {
       // Show only raw text with primary styling (larger and bolder)
       const rawEl = document.createElement('div');
       rawEl.className = 'studio0808-subtitle-zh-item';
       rawEl.textContent = item.text_raw || item.text_zh;
       lineWrapper.appendChild(rawEl);
-    } else { // 'translation' (Chinese only)
-      const zhEl = document.createElement('div');
-      zhEl.className = 'studio0808-subtitle-zh-item';
-      zhEl.textContent = item.text_zh;
-      lineWrapper.appendChild(zhEl);
+    } else {
+      // Translation is active
+      if (showBilingual) {
+        // Show raw (top) + translated (bottom)
+        if (item.text_raw && item.text_raw !== item.text_zh) {
+          const rawEl = document.createElement('div');
+          rawEl.className = 'studio0808-subtitle-raw-item';
+          rawEl.textContent = item.text_raw;
+          lineWrapper.appendChild(rawEl);
+        }
+        const zhEl = document.createElement('div');
+        zhEl.className = 'studio0808-subtitle-zh-item';
+        zhEl.textContent = item.text_zh;
+        lineWrapper.appendChild(zhEl);
+      } else {
+        // Show only translated text with primary styling (larger and bolder)
+        const zhEl = document.createElement('div');
+        zhEl.className = 'studio0808-subtitle-zh-item';
+        zhEl.textContent = item.text_zh;
+        lineWrapper.appendChild(zhEl);
+      }
     }
     
     subtitleContainer.appendChild(lineWrapper);
@@ -213,15 +215,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     subtitleHistory = []; // Reset history queue
     subtitleContainer.innerHTML = '';
     
-    const subtitleMode = message.subtitleMode || 'bilingual';
+    const targetLang = message.targetLang || 'none';
+    const showBilingual = message.showBilingual !== false;
     
     // Push initial status placeholder
     subtitleHistory.push({
-      text_raw: subtitleMode !== 'translation' ? '語音系統已連線，準備辨識中...' : '',
+      text_raw: targetLang === 'none' ? '語音系統已連線，準備辨識中...' : '',
       text_zh: '語音系統已連線，準備辨識中...'
     });
     
-    renderHistorySubtitles(subtitleMode);
+    renderHistorySubtitles(targetLang, showBilingual);
     
     if (clearTimer) clearTimeout(clearTimer);
     clearTimer = setTimeout(clearSubtitle, 4000);
@@ -236,7 +239,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     initSubtitleOverlay();
     
     const data = message.data;
-    const subtitleMode = message.subtitleMode || 'bilingual';
+    const targetLang = message.targetLang || 'none';
+    const showBilingual = message.showBilingual !== false;
     
     // Clear initial status placeholders if any
     subtitleHistory = subtitleHistory.filter(item => item.text_zh !== '語音系統已連線，準備辨識中...');
@@ -264,7 +268,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       subtitleHistory = subtitleHistory.slice(subtitleHistory.length - (maxHistoryLines + 1));
     }
     
-    renderHistorySubtitles(subtitleMode);
+    renderHistorySubtitles(targetLang, showBilingual);
     
     // Set auto-fade timer
     if (clearTimer) clearTimeout(clearTimer);
@@ -274,8 +278,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   
   if (message.type === 'toggle-bilingual' || message.type === 'update-subtitle-mode') {
     initSubtitleOverlay();
-    const subtitleMode = message.subtitleMode || (message.showBilingual !== false ? 'bilingual' : 'translation');
-    renderHistorySubtitles(subtitleMode);
+    const targetLang = message.targetLang || 'none';
+    const showBilingual = message.showBilingual !== false;
+    renderHistorySubtitles(targetLang, showBilingual);
   }
   
   if (message.type === 'update-styles') {
@@ -289,12 +294,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (subtitleHistory.length > maxHistoryLines + 1) {
       subtitleHistory = subtitleHistory.slice(subtitleHistory.length - (maxHistoryLines + 1));
     }
-    chrome.storage.local.get(['subtitleMode', 'showBilingual'], (result) => {
-      let subtitleMode = result.subtitleMode;
-      if (!subtitleMode) {
-        subtitleMode = result.showBilingual !== false ? 'bilingual' : 'translation';
-      }
-      renderHistorySubtitles(subtitleMode);
+    chrome.storage.local.get(['targetLang', 'showBilingual'], (result) => {
+      const targetLang = result.targetLang || 'none';
+      const showBilingual = result.showBilingual !== false;
+      renderHistorySubtitles(targetLang, showBilingual);
     });
   }
 });

@@ -10,7 +10,8 @@ import sherpa_onnx
 from opencc import OpenCC
 
 # 初始化簡繁體轉換器
-cc_converter = OpenCC('s2t')
+cc_s2t = OpenCC('s2t')
+cc_t2s = OpenCC('t2s')
 
 app = FastAPI(title="Studio0808_LiveCaption Backend")
 
@@ -89,11 +90,25 @@ def clean_sense_voice_text(text: str) -> str:
 # 全局變數，用來快取 Ollama 是否在線，避免每次都等待 3 秒超時
 ollama_online = True
 
-async def translate_text(text: str, ollama_url: str, model_name: str, deepseek_key: str = None) -> str:
+LANG_MAP = {
+    "zh-TW": "繁體中文 (Traditional Chinese)",
+    "zh-CN": "簡體中文 (Simplified Chinese)",
+    "en": "英文 (English)",
+    "ja": "日文 (Japanese)",
+    "ko": "韓文 (Korean)",
+    "es": "西班牙文 (Spanish)",
+    "fr": "法文 (French)",
+    "de": "德文 (German)",
+    "ru": "俄文 (Russian)",
+}
+
+async def translate_text(text: str, target_lang: str, ollama_url: str, model_name: str, deepseek_key: str = None) -> str:
     global ollama_online
     """
     三軌翻譯引擎：支援線上 DeepSeek API、本機 Ollama、以及免費的 Google Translate API (終極備用)。
     """
+    target_name = LANG_MAP.get(target_lang, "繁體中文")
+
     # 1. 優先嘗試 DeepSeek API (若有提供 API Key)
     if deepseek_key and len(deepseek_key.strip()) > 10:
         try:
@@ -107,7 +122,7 @@ async def translate_text(text: str, ollama_url: str, model_name: str, deepseek_k
                     json={
                         "model": "deepseek-chat",
                         "messages": [
-                            {"role": "system", "content": "你是一個專業的影片字幕即時翻譯官。請將輸入的英文或日文等字幕，翻譯成簡短流暢的繁體中文。請只輸出翻譯後的繁體中文，不要包含任何解釋、引言或額外標記，保持字數與原句差不多。"},
+                            {"role": "system", "content": f"你是一個專業的影片字幕即時翻譯官。請將輸入的影片語音字幕，翻譯成簡短流暢的{target_name}。請只輸出翻譯後的文字，不要包含任何解釋、引言或額外標記，保持字數與原句差不多。"},
                             {"role": "user", "content": text}
                         ],
                         "temperature": 0.3
@@ -123,9 +138,9 @@ async def translate_text(text: str, ollama_url: str, model_name: str, deepseek_k
     if ollama_url and ollama_online:
         try:
             prompt = (
-                "你是一個專業的影片字幕即時翻譯官。請將輸入的日文或英文等字幕，翻譯成簡短流暢的繁體中文。請只輸出翻譯後的繁體中文，不要包含任何解釋、引言或額外標記。\n\n"
+                f"你是一個專業的影片字幕即時翻譯官。請將輸入的影片語音字幕，翻譯成簡短流暢的{target_name}。請只輸出翻譯後的文字，不要包含任何解釋、引言或額外標記。\n\n"
                 f"原文字幕：{text}\n"
-                "中文翻譯："
+                f"翻譯結果："
             )
             async with httpx.AsyncClient(timeout=3.0) as client:
                 response = await client.post(
@@ -154,7 +169,7 @@ async def translate_text(text: str, ollama_url: str, model_name: str, deepseek_k
             params = {
                 "client": "gtx",
                 "sl": "auto",
-                "tl": "zh-TW",
+                "tl": target_lang,
                 "dt": "t",
                 "q": text
             }
@@ -209,6 +224,7 @@ async def websocket_endpoint(websocket: WebSocket):
     model_name = "qwen2.5:3b-instruct"
     deepseek_key = None
     source_lang = "auto"
+    target_lang = "none"
 
     try:
         while True:
@@ -224,6 +240,7 @@ async def websocket_endpoint(websocket: WebSocket):
                         model_name = config_data.get("model_name", model_name)
                         deepseek_key = config_data.get("deepseek_key", deepseek_key)
                         source_lang = config_data.get("source_lang", source_lang)
+                        target_lang = config_data.get("target_lang", target_lang)
                         global ollama_online
                         ollama_online = True
                         
@@ -242,7 +259,7 @@ async def websocket_endpoint(websocket: WebSocket):
                             sample_rate=16000,
                         )
                         local_vad = sherpa_onnx.VoiceActivityDetector(vad_config, buffer_size_in_seconds=30)
-                        print(f"已更新後端設定: Ollama={ollama_url}, Model={model_name}, SourceLang={source_lang}")
+                        print(f"已更新後端設定: Ollama={ollama_url}, Model={model_name}, SourceLang={source_lang}, TargetLang={target_lang}")
                         print(f"已動態更新 VAD 設定: min_silence={min_silence}s, max_speech={max_speech}s")
                 except Exception as e:
                     print(f"解析設定訊息或更新 VAD 失敗: {e}")
@@ -277,28 +294,40 @@ async def websocket_endpoint(websocket: WebSocket):
                         raw_text = clean_sense_voice_text(full_asr_text)
                         
                         if raw_text:
-                            # 判定是否為中文 (中文/粵語)
-                            is_chinese = False
-                            if source_lang in ["zh-TW", "zh-CN"]:
-                                is_chinese = True
-                            elif source_lang == "auto":
-                                if "<|zh|>" in full_asr_text or "<|yue|>" in full_asr_text:
-                                    is_chinese = True
-                            
-                            if is_chinese:
-                                # 中文音訊：直接使用本機 OpenCC 轉換，不呼叫外部/本機 LLM 翻譯，節省連線與運算時間
-                                translated_text = cc_converter.convert(raw_text)
-                                print(f"ASR 識別 [{start_time:.2f}s] (中文/本地轉換): {raw_text}")
-                                
-                                # 如果是指定繁體中文或自動，將 raw 也轉成繁體以讓前端自動隱藏重複行
-                                if source_lang in ["zh-TW", "auto"]:
-                                    raw_text = translated_text
-                                print(f"轉換結果: {translated_text}")
+                            # 偵測 ASR 識別語音標籤
+                            recognized_lang = "auto"
+                            if "<|zh|>" in full_asr_text or "<|yue|>" in full_asr_text:
+                                recognized_lang = "zh"
+                            elif "<|en|>" in full_asr_text:
+                                recognized_lang = "en"
+                            elif "<|ja|>" in full_asr_text:
+                                recognized_lang = "ja"
+                            elif "<|ko|>" in full_asr_text:
+                                recognized_lang = "ko"
+
+                            # 判定是否需要翻譯
+                            if target_lang == "none":
+                                # 僅顯示原文
+                                translated_text = raw_text
+                                print(f"ASR 識別 [{start_time:.2f}s] (僅顯示原文): {raw_text}")
+                            elif target_lang == recognized_lang:
+                                # 識別語言與目標翻譯語言一致，跳過翻譯
+                                translated_text = raw_text
+                                print(f"ASR 識別 [{start_time:.2f}s] (識別與目標一致 '{target_lang}'，跳過翻譯): {raw_text}")
+                            elif recognized_lang == "zh" and target_lang in ["zh-TW", "zh-CN"]:
+                                # 都是中文，使用本地 OpenCC
+                                if target_lang == "zh-TW":
+                                    translated_text = cc_s2t.convert(raw_text)
+                                    raw_text = translated_text  # 同步為繁體，方便前端去重
+                                else:
+                                    translated_text = cc_t2s.convert(raw_text)
+                                    raw_text = translated_text  # 同步為簡體
+                                print(f"ASR 識別 [{start_time:.2f}s] (中文本地 CC 轉換): {translated_text}")
                             else:
-                                # 非中文音訊：使用原本的翻譯流程
-                                print(f"ASR 識別 [{start_time:.2f}s]: {raw_text}")
+                                # 進行翻譯
+                                print(f"ASR 識別 [{start_time:.2f}s] (目標語言 '{target_lang}'): {raw_text}")
                                 translated_text = await translate_text(
-                                    raw_text, ollama_url, model_name, deepseek_key
+                                    raw_text, target_lang, ollama_url, model_name, deepseek_key
                                 )
                                 print(f"翻譯結果: {translated_text}")
                             
