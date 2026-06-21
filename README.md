@@ -1,5 +1,7 @@
 # Studio0808 LiveCaption - 即時網頁影音雙語字幕系統
 
+[English Version](README_EN.md) | [繁體中文](README.md)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Platform: Windows | macOS](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS-brightgreen.svg)](#)
 [![ASR: SenseVoice](https://img.shields.io/badge/ASR-SenseVoice--Small-orange.svg)](#)
