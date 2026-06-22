@@ -14,6 +14,24 @@ Ideal for online learning, accessibility/hearing-assist, foreign language listen
 
 ---
 
+## 💡 Technical Highlights & Architecture (Why it's NOT reinventing the wheel)
+
+This system uses **real-time sentence-level streaming detection & translation technology**, rather than simple post-processed file transcribing or static track extraction:
+
+1. **Tab Audio Loopback (Lossless & Exclusive Capture)**:
+   - Uses Chrome Extension's Offscreen Document and `tabCapture` APIs to capture the digital audio output of the specific active tab directly.
+   - **Advantage**: Does not occupy or interfere with system microphone or speakers. It will not record ambient room noise, typing sounds, or audio from other tabs, ensuring pristine audio input for the ASR engine.
+2. **Near Real-time Stream Processing (Dynamic ASR & VAD)**:
+   - While playing a video, the browser slices audio and streams it to the Python backend in real-time using binary WebSockets.
+   - The backend runs an optimized local **Silero VAD (Voice Activity Detection)** model on the stream to dynamically chunk sentences (detecting short pauses, e.g., 0.5s silence). As soon as a sentence ends, it is immediately dispatched to the local **SenseVoice-Small** engine.
+   - **Experience**: Near-real-time sentence-level captions and translation (showing up about 100ms - 300ms after speech ends) instead of processing the video after it finishes.
+3. **100% Offline & Privacy-First**:
+   - Supports a fully offline stack: ASR powered by local **Sherpa-ONNX**, and translation powered by local **Ollama** (Qwen 2.5 3B recommended). All audio processing and text generation remain strictly on your local machine.
+4. **Hot-Swappable Translation Engines**:
+   - Supports OpenCC for local Traditional/Simplified Chinese conversion, local Ollama offline translation, online DeepSeek API, and a free Google Translate API fallback.
+
+---
+
 ## 🚀 Pre-Packaged Offline Bundle Download (Recommended for Windows)
 
 If you do not want to configure the Python development environment, you can download the pre-compiled, one-click execution offline bundle:

@@ -719,7 +719,7 @@
       gap: 6px;
     }
 
-    .faq-card p {
+    .faq-card p, .faq-card .faq-desc {
       color: var(--text-secondary);
       font-size: 13.5px;
       line-height: 1.5;
@@ -1327,7 +1327,7 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
             <span data-i18n="faq4-title">問題 4：如何申請與配置 DeepSeek 雲端翻譯金鑰 (API Key)？</span>
           </h4>
-          <p data-i18n="faq4-desc">
+          <div class="faq-desc" data-i18n="faq4-desc">
             使用 DeepSeek 雲端翻譯可以極低成本取得極精準的雙語對照。請依以下步驟申請：
             <ol>
               <li><strong>註冊/登入開發者平台</strong>：造訪 <a href="https://platform.deepseek.com/" target="_blank" style="color:#0284c7; text-decoration:none; font-weight:600;">DeepSeek 開放平台</a>。您可以透過手機註冊或 Google 帳號快速登入。</li>
@@ -1336,7 +1336,7 @@
               <li><strong>複製金鑰</strong>：複製系統產生的以 <code>sk-</code> 開頭的金鑰。基於安全限制，該金鑰只會顯示一次，請務必當下複製保存。</li>
               <li><strong>配置到外掛</strong>：點擊 Chrome 的 LiveCaption 外掛圖示，在「DeepSeek API 金鑰」欄位貼上剛才複製的金鑰，即可自動啟用雲端翻譯。</li>
             </ol>
-          </p>
+          </div>
         </div>
 
         <!-- Q5 (Mac Support) -->
@@ -1345,14 +1345,14 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
             <span data-i18n="faq5-title">問題 5：Mac 電腦也可以使用嗎？</span>
           </h4>
-          <p data-i18n="faq5-desc">
+          <div class="faq-desc" data-i18n="faq5-desc">
             <strong>可以！Mac 電腦完全可以使用，但啟動方式與 Windows 略有不同：</strong>
             <ol>
               <li><strong>瀏覽器外掛 (Chrome Extension)</strong>：100% 支援。外掛的安裝與使用方式在 Mac Chrome 瀏覽器上與 Windows 完全相同。</li>
               <li><strong>後端伺服器 (Python Backend)</strong>：發布包中的 <code>.exe</code> 與 <code>.bat</code> 為 Windows 專用。Mac 使用者若要使用，需先安裝 Python 環境，並於終端機執行 <code>pip install -r requirements.txt</code> 安裝依賴，再執行 <code>python main.py</code> 啟動。</li>
               <li><strong>處理器晶片相容性</strong>：辨識核心對 Mac 的 Intel 晶片與 Apple Silicon (M1/M2/M3) 晶片皆有原生高效能優化，可流暢執行。</li>
             </ol>
-          </p>
+          </div>
         </div>
 
         <!-- Q6 (Roadmap Memo) -->
@@ -1361,15 +1361,16 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
             <span data-i18n="faq6-title">備忘與未來規劃：開發方案 B「桌面獨立程式」版本？</span>
           </h4>
-          <p data-i18n="faq6-desc">
+          <div class="faq-desc" data-i18n="faq6-desc">
             目前我們採用「Chrome 外掛 (擷取與顯示) + 本機 Python (AI 大腦)」的雙軌架構。若未來您希望脫離 Chrome 瀏覽器、為 PotPlayer 等本機軟體或 Teams/Zoom 視訊程式提供即時字幕，可以規畫另外開發為獨立桌面程式：
             <ol>
               <li><strong>系統音訊錄製 (WASAPI Loopback)</strong>：捨棄瀏覽器專用 API，改在 Python 中使用 Windows WASAPI 環回機制錄音，這樣便能直接擷取電腦喇叭播放的所有聲音。</li>
               <li><strong>獨立桌面懸浮視窗 (PyQt6 / PySide6)</strong>：在 Python 建立半透明、無邊框、永遠置頂 (Always on Top) 的桌面 UI 字幕視窗。</li>
               <li><strong>特性評估</strong>：此方案將可支援全電腦所有音軌，但需要防範其他系統通知雜音（例如通訊軟體叮咚聲）對辨識的干擾。本項目將作爲未來獨立產品另外開發。</li>
             </ol>
-          </p>
+          </div>
         </div>
+
 
         <!-- Q7 (Console Developer Errors/Warnings) -->
         <div class="faq-card">
