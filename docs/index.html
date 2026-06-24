@@ -1416,6 +1416,21 @@
             <small>※ 提示：在上述瀏覽器的網址列輸入 <code>chrome://extensions/</code> 也會自動跳轉至對應的擴充功能設定頁面。</small>
           </div>
         </div>
+        <!-- Q10 (Firefox Incompatibility) -->
+        <div class="faq-card">
+          <h4>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+            <span data-i18n="faq10-title">問題 10：Firefox 瀏覽器可以使用嗎？</span>
+          </h4>
+          <div class="faq-desc" data-i18n="faq10-desc">
+            <strong>很遺憾，Firefox 目前無法直接使用本系統的外掛。</strong>原因說明如下：
+            <ul>
+              <li><strong>引擎架構不同</strong>：Firefox 使用 Mozilla 自家的 <strong>Gecko 引擎</strong>，而非 Chromium 核心。本系統外掛依賴 Chrome 專屬的擴充功能 API（例如 <code>chrome.tabCapture</code>、<code>chrome.offscreen</code> 等），這些 API 在 Firefox 中完全不存在，也沒有對應的替代方案。</li>
+              <li><strong>Manifest 格式差異</strong>：本外掛採用 Chrome Manifest V3 規範，Firefox 雖然也開始支援 MV3，但在權限模型與背景腳本（Service Worker vs. Background Page）的實作上仍有顯著差異，導致無法直接移植。</li>
+              <li><strong>建議替代方案</strong>：若您習慣使用 Firefox，建議在需要即時字幕功能時，暫時改用 Google Chrome、Microsoft Edge 或其他 Chromium 核心瀏覽器（詳見問題 9）。</li>
+            </ul>
+          </div>
+        </div>
       </div>
 
     </div>
