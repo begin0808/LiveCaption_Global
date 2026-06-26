@@ -132,6 +132,12 @@ To modify the Python backend and package it into a `.exe` executable for Windows
 *   **Reason**: The Voice Activity Detection (VAD) model needs a transient delay (around 100ms) to detect active speech. Quiet or short start words (like "我", "你") can get clipped.
 *   **Solution**: In the extension settings under "VAD Settings", increase **"Segment Silence Duration" to `0.8` seconds** and **"Max Sentence Duration" to `8.0` seconds or longer**. The latest backend has also lowered the VAD trigger threshold to `0.4` and minimum speech duration to `0.15s` for higher sensitivity.
 
+#### Q3: Should I use Ollama or Google Translate for live translation? How do speed and stability differ?
+Measured per-sentence latency on the same video (target Traditional Chinese) shows distinctly different speed characteristics:
+*   **Ollama local translation (recommended, requires GPU)**: **Very stable** speed, about `0.6 – 0.8 s` per sentence. Since it runs entirely on your local GPU with no network variability, the subtitle rhythm stays smooth without sudden stalls — plus you get offline privacy and consistent Traditional Chinese output.
+*   **Google Translate (zero-config fallback)**: Fast on average (mostly around `0.5 s`), but it **depends on your network quality**; during network spikes a single sentence can jump to `1.5 – 2.4 s`, causing occasional subtitle stutter. In general, a **wired (Ethernet) connection is more stable than wireless Wi-Fi**.
+*   **Conclusion**: For live subtitles, what matters most is staying stutter-free, not the fastest single sentence. If you have an NVIDIA GPU, prefer Ollama; if you have no GPU or don't want to install Ollama, Google Translate is a handy zero-config fallback (pair it with a wired connection for better stability).
+
 ---
 
 ## ✉️ Contact & Support

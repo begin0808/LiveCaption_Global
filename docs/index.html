@@ -1500,6 +1500,17 @@
             </ul>
           </div>
         </div>
+
+        <!-- Q13 (Translation Engine Speed: Ollama vs Google) -->
+        <div class="faq-card">
+          <h4>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+            <span data-i18n="faq13-title">問題 13：即時翻譯要選 Ollama 還是 Google 翻譯？速度與穩定度差在哪？</span>
+          </h4>
+          <div class="faq-desc" data-i18n="faq13-desc">
+            兩種翻譯引擎在速度特性上有明顯差異。實測同一支影片（目標繁體中文）的單句翻譯耗時：<ul><li><strong>Ollama 本機翻譯（推薦，需 GPU）</strong>：速度<strong>非常穩定</strong>，每句約 <code>0.6 ~ 0.8 秒</code>。因為完全在本機 GPU 運算、沒有網路變數，字幕節奏平順、不會突然卡頓，同時兼具離線隱私與繁體一致的優勢。</li><li><strong>Google 翻譯（免設定備援）</strong>：平均速度也很快（多數約 <code>0.5 秒</code>），但<strong>取決於您的網路品質</strong>；網路尖峰時單句可能跳到 <code>1.5 ~ 2.4 秒</code>，造成字幕偶發卡頓。一般而言<strong>有線網路 (Ethernet) 會比無線 Wi-Fi 更穩定</strong>。</li></ul><strong>結論</strong>：即時字幕最在意的是「穩定不卡頓」而非單句最快。<strong>若您有 NVIDIA GPU，建議優先使用 Ollama</strong>（穩定 + 離線 + 高品質）；若無 GPU 或不想安裝 Ollama，Google 翻譯是免設定的好用備援（建議搭配有線網路以提升穩定度）。
+          </div>
+        </div>
       </div>
 
     </div>
