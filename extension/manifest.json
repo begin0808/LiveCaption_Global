@@ -1,7 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Studio0808 LiveCaption (全球語系版本)",
-  "version": "2026.06.26",
+  "version": "2026.6.26",
+  "version_name": "V20260626 (全球語系版本)",
   "description": "即時影片語音翻譯雙語字幕外掛 (100% 本機與隱私)",
   "icons": {
     "16": "icon16.png",
