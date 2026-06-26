@@ -2,6 +2,7 @@ import os
 import sys
 import re
 import json
+import time
 import asyncio
 from pathlib import Path
 
@@ -302,6 +303,7 @@ async def translate_text(text: str, target_lang: str, ollama_url: str, model_nam
     # 1. 優先嘗試 DeepSeek API (若有提供 API Key)
     if deepseek_key and len(deepseek_key.strip()) > 10:
         try:
+            _t0 = time.perf_counter()
             async with httpx.AsyncClient(timeout=3.0) as client:
                 response = await client.post(
                     "https://api.deepseek.com/v1/chat/completions",
@@ -321,7 +323,7 @@ async def translate_text(text: str, target_lang: str, ollama_url: str, model_nam
                 if response.status_code == 200:
                     res_json = response.json()
                     translated = res_json["choices"][0]["message"]["content"].strip()
-                    print(f"  ➔ [DeepSeek 翻譯]")
+                    print(f"  ➔ [DeepSeek 翻譯] (耗時 {(time.perf_counter()-_t0)*1000:.0f} ms)")
                     return translated
         except Exception as e:
             print(f"DeepSeek 翻譯失敗: {e}")
@@ -340,6 +342,7 @@ async def translate_text(text: str, target_lang: str, ollama_url: str, model_nam
                 "只輸出翻譯後的譯文本身，並輸出為「單獨一行純文字」；"
                 "嚴禁輸出原文、注音、拼音、解釋、引言、括號標註、清單符號、換行或任何額外標記。"
             )
+            _t0 = time.perf_counter()
             async with httpx.AsyncClient(timeout=15.0) as client:
                 # 改用 system + 乾淨 prompt（套用模型 chat 模板），比補全式 prompt 更穩定，避免亂碼輸出
                 response = await client.post(
@@ -364,7 +367,7 @@ async def translate_text(text: str, target_lang: str, ollama_url: str, model_nam
                     if target_lang == "zh-TW" and translated:
                         translated = cc_s2t.convert(translated)
                     if translated:
-                        print(f"  ➔ [Ollama 翻譯 ({model_name})]")
+                        print(f"  ➔ [Ollama 翻譯 ({model_name})] (耗時 {(time.perf_counter()-_t0)*1000:.0f} ms)")
                         return translated
         except Exception as e:
             import traceback
@@ -375,6 +378,7 @@ async def translate_text(text: str, target_lang: str, ollama_url: str, model_nam
 
     # 3. 終極備用：免費 Google Translate Web API (免 Key、免配置、即開即用)
     try:
+        _t0 = time.perf_counter()
         async with httpx.AsyncClient(timeout=3.0) as client:
             url = "https://translate.googleapis.com/translate_a/single"
             params = {
@@ -388,7 +392,7 @@ async def translate_text(text: str, target_lang: str, ollama_url: str, model_nam
             if response.status_code == 200:
                 res_json = response.json()
                 translated = "".join([part[0] for part in res_json[0] if part[0]])
-                print(f"  ➔ [Google 翻譯]")
+                print(f"  ➔ [Google 翻譯] (耗時 {(time.perf_counter()-_t0)*1000:.0f} ms)")
                 return translated.strip()
     except Exception as e:
         print(f"Google 翻譯失敗: {e}")
