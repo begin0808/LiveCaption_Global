@@ -329,29 +329,43 @@ async def translate_text(text: str, target_lang: str, ollama_url: str, model_nam
     # 2. 本機離線 Ollama 翻譯
     if ollama_url and ollama_online:
         try:
-            prompt = (
-                f"你是一個專業的影片字幕即時翻譯官。請將輸入的影片語音字幕，翻譯成簡短流暢的{target_name}。請只輸出翻譯後的文字，不要包含任何解釋、引言或額外標記。\n\n"
-                f"原文字幕：{text}\n"
-                f"翻譯結果："
+            # 針對目標語言強化指令；繁體中文額外強制不可輸出簡體字
+            if target_lang == "zh-TW":
+                lang_rule = "輸出必須是「繁體中文（台灣用語）」，絕對禁止輸出任何簡體字。"
+            else:
+                lang_rule = f"輸出必須是{target_name}。"
+            system_prompt = (
+                f"你是一個專業的影片字幕即時翻譯官。請將使用者輸入的影片語音字幕，翻譯成簡短流暢的{target_name}。"
+                f"{lang_rule}"
+                "只輸出翻譯後的譯文本身，並輸出為「單獨一行純文字」；"
+                "嚴禁輸出原文、注音、拼音、解釋、引言、括號標註、清單符號、換行或任何額外標記。"
             )
             async with httpx.AsyncClient(timeout=15.0) as client:
+                # 改用 system + 乾淨 prompt（套用模型 chat 模板），比補全式 prompt 更穩定，避免亂碼輸出
                 response = await client.post(
                     f"{ollama_url}/api/generate",
                     json={
                         "model": model_name,
-                        "prompt": prompt,
+                        "system": system_prompt,
+                        "prompt": text,
                         "stream": False,
                         "options": {
-                            "temperature": 0.3,
-                            "num_predict": 40
+                            "temperature": 0.2,
+                            "num_predict": 80
                         }
                     }
                 )
                 if response.status_code == 200:
                     res_json = response.json()
                     translated = res_json.get("response", "").strip()
-                    print(f"  ➔ [Ollama 翻譯 ({model_name})]")
-                    return translated
+                    # 壓平殘留的換行與多餘空白，消除「分行/分段」型亂碼
+                    translated = " ".join(translated.split())
+                    # 繁體中文目標：再過一道 OpenCC s2t，徹底消除簡體殘留 (天气→天氣、钱→錢)
+                    if target_lang == "zh-TW" and translated:
+                        translated = cc_s2t.convert(translated)
+                    if translated:
+                        print(f"  ➔ [Ollama 翻譯 ({model_name})]")
+                        return translated
         except Exception as e:
             import traceback
             print(f"本機 Ollama 翻譯調用失敗 ({type(e).__name__}: {e})。詳細錯誤資訊如下：")
