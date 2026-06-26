@@ -370,11 +370,15 @@ async def translate_text(text: str, target_lang: str, ollama_url: str, model_nam
                         print(f"  ➔ [Ollama 翻譯 ({model_name})] (耗時 {(time.perf_counter()-_t0)*1000:.0f} ms)")
                         return translated
         except Exception as e:
-            import traceback
-            print(f"本機 Ollama 翻譯調用失敗 ({type(e).__name__}: {e})。詳細錯誤資訊如下：")
-            traceback.print_exc()
-            print("本工作階段後續將自動跳過 Ollama，避免連線超時延遲。")
-            ollama_online = False
+            # 區分兩種失敗：服務沒開 vs 模型載入中(冷啟動)
+            if isinstance(e, (httpx.ConnectError, httpx.ConnectTimeout)):
+                # 連不上 Ollama 服務 → 本工作階段跳過，避免每句都空等逾時
+                print(f"本機 Ollama 連線失敗 ({type(e).__name__})，服務可能未啟動，本工作階段後續將跳過 Ollama。")
+                ollama_online = False
+            else:
+                # 多為 ReadTimeout：服務有回應但模型正在載入(冷啟動)。
+                # 本句先用後備引擎，但「不」永久關閉 Ollama，下一句模型暖機後會自動接手。
+                print(f"本機 Ollama 本次回應逾時 ({type(e).__name__})，可能為模型載入中；本句改用後備引擎，下一句再試 Ollama。")
 
     # 3. 終極備用：免費 Google Translate Web API (免 Key、免配置、即開即用)
     try:
