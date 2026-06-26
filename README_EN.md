@@ -15,7 +15,7 @@ Ideal for online learning, accessibility/hearing-assist, foreign language listen
 
 ---
 
-## 💡 Technical Highlights & Architecture (Why it's NOT reinventing the wheel)
+## 💡 Technical Highlights & Architecture
 
 This system uses **real-time sentence-level streaming detection & translation technology**, rather than simple post-processed file transcribing or static track extraction:
 
@@ -27,7 +27,7 @@ This system uses **real-time sentence-level streaming detection & translation te
    - The backend runs an optimized local **Silero VAD (Voice Activity Detection)** model on the stream to dynamically chunk sentences (detecting short pauses, e.g., 0.5s silence). As soon as a sentence ends, it is immediately dispatched to the local **SenseVoice-Small** engine.
    - **Experience**: Near-real-time sentence-level captions and translation (showing up about 100ms - 300ms after speech ends) instead of processing the video after it finishes.
 3. **100% Offline & Privacy-First**:
-   - Supports a fully offline stack: ASR powered by local **Sherpa-ONNX**, and translation powered by local **Ollama** (Qwen 2.5 3B recommended). All audio processing and text generation remain strictly on your local machine.
+   - Supports a fully offline stack: ASR powered by local **Sherpa-ONNX**, and translation powered by local **Ollama** (Qwen 2.5 7B recommended for best quality, or 3B for faster speed and lower VRAM). All audio processing and text generation remain strictly on your local machine.
 4. **Hot-Swappable Translation Engines**:
    - Supports OpenCC for local Traditional/Simplified Chinese conversion, local Ollama offline translation, online DeepSeek API, and a free Google Translate API fallback.
 
@@ -46,7 +46,7 @@ If you do not want to configure the Python development environment, you can down
 
 *   **Ultra-Low Latency Tab Audio Capture**: Uses a unique Chrome Extension tab audio loopback mechanism to precisely capture audio tracks playing in the active tab without affecting other system audio or recording devices.
 *   **Dual-Engine Offline Local AI Speech Recognition**: Powered by the Sherpa-ONNX architecture, integrating both **SenseVoice-Small** (ultra-fast recognition for Chinese, English, Japanese, Korean, and Cantonese) and **Whisper** (high-precision recognition for nearly 100 global languages such as French, German, Spanish, Italian, and Russian). Switch engines anytime based on the video content for barrier-free global video reading.
-*   **Flexible Translation Engines**: Supports the local **Ollama** framework (Qwen 2.5 3B recommended) for fully offline translation, as well as the online **DeepSeek** Cloud API for near-human quality translation.
+*   **Flexible Translation Engines**: Supports the local **Ollama** framework (Qwen 2.5 7B recommended for best quality, or 3B for speed) for fully offline translation, as well as the online **DeepSeek** Cloud API for near-human quality translation.
 *   **Premium Glassmorphism Subtitle Window**: An elegant semi-transparent floating window overlay supporting custom font sizes and colors, mouse click-through, drag-and-drop repositioning, and double-click to reset.
 *   **Multi-Line History Subtitle Scrolling**: Retains 0 to 2 lines of historical subtitles, fading and shrinking older lines upward to ensure you don't miss fast-paced speech.
 *   **100% Offline Privacy & Security**: All audio capture, speech recognition, translation, and rendering are done locally. No internet access is required, ensuring absolute privacy.
