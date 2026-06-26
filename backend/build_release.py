@@ -82,6 +82,11 @@ def main():
         if os.path.exists(whisper_dst):
             shutil.rmtree(whisper_dst)
         shutil.copytree(whisper_src, whisper_dst)
+        # 僅保留 int8 模型，剔除較大的 fp32 .onnx (程式預設載入 int8，可省約 925MB)
+        for f in os.listdir(whisper_dst):
+            if f.endswith(".onnx") and ".int8." not in f:
+                os.remove(os.path.join(whisper_dst, f))
+                print(f"已剔除 fp32 模型以節省空間: {f}")
     else:
         print("警告: 找不到 Whisper 模型目錄！請先執行 download_models.py")
 
