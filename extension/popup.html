@@ -47,6 +47,14 @@
     </div>
 
     <div class="input-group" style="margin-bottom: 16px;">
+      <label for="asr-engine" id="label-asr-engine">語音辨識引擎</label>
+      <select id="asr-engine" style="cursor: pointer;">
+        <option value="sensevoice" id="opt-asr-sensevoice">SenseVoice (極速模式)</option>
+        <option value="whisper" id="opt-asr-whisper">Whisper-Small (多國語言/GPU加速)</option>
+      </select>
+    </div>
+
+    <div class="input-group" style="margin-bottom: 16px;">
       <label for="source-lang" id="label-source-lang">影片來源語言</label>
       <select id="source-lang" style="cursor: pointer;">
         <option value="auto" id="opt-source-auto">自動偵測 (Auto)</option>
@@ -86,12 +94,15 @@
     <div class="section-title" id="title-ollama">本機翻譯設定 (Ollama)</div>
     <div class="input-group">
       <label for="ollama-url">Ollama 伺服器網址</label>
-      <input type="text" id="ollama-url" value="http://localhost:11434" placeholder="http://localhost:11434">
+      <input type="text" id="ollama-url" value="http://127.0.0.1:11434" placeholder="http://127.0.0.1:11434">
     </div>
 
     <div class="input-group">
       <label for="model-name">翻譯模型名稱</label>
-      <input type="text" id="model-name" value="qwen2.5:3b-instruct" placeholder="qwen2.5:3b-instruct">
+      <select id="model-name" style="cursor: pointer;">
+        <option value="qwen2.5:7b-instruct" selected>qwen2.5:7b-instruct</option>
+        <option value="qwen2.5:3b-instruct">qwen2.5:3b-instruct</option>
+      </select>
     </div>
 
     <div class="section-title" id="title-deepseek">雲端翻譯備用 (選填)</div>

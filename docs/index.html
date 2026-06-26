@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>即時字幕-Studio0808 </title>
+  <title>即時字幕 - Studio0808 LiveCaption(全球語系版本)</title>
   <!-- Colorful Inline SVG Favicon representing speech & play -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cdefs%3E%3ClinearGradient id='fav-grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%230284c7'/%3E%3Cstop offset='100%25' stop-color='%2310b981'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23fav-grad)' d='M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zM8 14H6v-2h2v2zm0-3H6V9h2v2zm0-3H6V6h2v2zm8 6h-6v-2h6v2zm0-3h-6V9h6v2zm0-3h-6V6h6v2z'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cdefs%3E%3ClinearGradient id='fav-grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%234f46e5'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23fav-grad)' d='M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zM8 14H6v-2h2v2zm0-3H6V9h2v2zm0-3H6V6h2v2zm8 6h-6v-2h6v2zm0-3h-6V9h6v2zm0-3h-6V6h6v2z'/%3E%3C/svg%3E">
   <!-- Google Fonts: Inter & Outfit -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,17 +13,17 @@
   
   <style>
     :root {
-      --bg-primary: #f4f7fa; /* 陽光清新淺灰藍 */
+      --bg-primary: #f8fafc; /* 星際淺灰藍 */
       --bg-secondary: #ffffff; /* 純白背景 */
-      --bg-tertiary: #eef2f6; /* 卡片與側欄底色 */
-      --text-primary: #1e293b; /* 深石板灰 */
-      --text-secondary: #64748b; /* 涼爽灰色 */
-      --accent-gradient: linear-gradient(135deg, #0284c7 0%, #0d9488 50%, #10b981 100%); /* 蔚藍到翠綠漸層 */
-      --accent-color: #0284c7; /* 蔚藍 */
-      --accent-color-light: #10b981; /* 翠綠 */
-      --accent-glow: rgba(2, 132, 199, 0.08);
+      --bg-tertiary: #f1f5f9; /* 卡片與側欄底色 */
+      --text-primary: #0f172a; /* 深石板灰 */
+      --text-secondary: #475569; /* 涼爽灰色 */
+      --accent-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #06b6d4 100%); /* 星際紫羅蘭到銀河青藍漸層 */
+      --accent-color: #4f46e5; /* 紫羅蘭 */
+      --accent-color-light: #06b6d4; /* 青藍 */
+      --accent-glow: rgba(79, 70, 229, 0.08);
       --glass-bg: rgba(255, 255, 255, 0.9);
-      --glass-border: rgba(0, 0, 0, 0.06);
+      --glass-border: rgba(15, 23, 42, 0.08);
       --font-heading: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -46,8 +46,8 @@
       line-height: 1.5;
       overflow-x: hidden;
       background-image: 
-        radial-gradient(circle at 10% 20%, rgba(2, 132, 199, 0.04) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.04) 0%, transparent 45%);
+        radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.04) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.04) 0%, transparent 45%);
       background-attachment: fixed;
     }
 
@@ -141,10 +141,10 @@
     .hero-badge {
       display: inline-block;
       padding: 4px 12px;
-      background: rgba(2, 132, 199, 0.06);
-      border: 1px solid rgba(2, 132, 199, 0.15);
+      background: rgba(79, 70, 229, 0.06);
+      border: 1px solid rgba(79, 70, 229, 0.15);
       border-radius: 100px;
-      color: #0284c7;
+      color: #4f46e5;
       font-size: 11px;
       font-weight: 700;
       margin-bottom: 12px;
@@ -240,28 +240,28 @@
 
     .scenario-card:hover {
       transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(2, 132, 199, 0.06);
-      border-color: rgba(2, 132, 199, 0.15);
+      box-shadow: 0 8px 20px rgba(79, 70, 229, 0.06);
+      border-color: rgba(79, 70, 229, 0.15);
     }
 
     /* Diverse Light Pastel Backgrounds for Scenario Cards */
-    .scenario-card:nth-child(1) { background-color: #f0f9ff; border-color: #e0f2fe; }
-    .scenario-card:nth-child(1) .scenario-icon { background: rgba(2, 132, 199, 0.08); color: #0284c7; }
+    .scenario-card:nth-child(1) { background-color: #f5f3ff; border-color: #ede9fe; }
+    .scenario-card:nth-child(1) .scenario-icon { background: rgba(79, 70, 229, 0.08); color: #4f46e5; }
 
-    .scenario-card:nth-child(2) { background-color: #f0fdf4; border-color: #dcfce7; }
-    .scenario-card:nth-child(2) .scenario-icon { background: rgba(16, 185, 129, 0.08); color: #10b981; }
+    .scenario-card:nth-child(2) { background-color: #ecfeff; border-color: #cffafe; }
+    .scenario-card:nth-child(2) .scenario-icon { background: rgba(6, 182, 212, 0.08); color: #0891b2; }
 
-    .scenario-card:nth-child(3) { background-color: #fffbeb; border-color: #fef3c7; }
-    .scenario-card:nth-child(3) .scenario-icon { background: rgba(245, 158, 11, 0.08); color: #d97706; }
+    .scenario-card:nth-child(3) { background-color: #faf5ff; border-color: #f3e8ff; }
+    .scenario-card:nth-child(3) .scenario-icon { background: rgba(139, 92, 246, 0.08); color: #7c3aed; }
 
-    .scenario-card:nth-child(4) { background-color: #faf5ff; border-color: #f3e8ff; }
-    .scenario-card:nth-child(4) .scenario-icon { background: rgba(139, 92, 246, 0.08); color: #7c3aed; }
+    .scenario-card:nth-child(4) { background-color: #f0f9ff; border-color: #e0f2fe; }
+    .scenario-card:nth-child(4) .scenario-icon { background: rgba(2, 132, 199, 0.08); color: #0284c7; }
 
-    .scenario-card:nth-child(5) { background-color: #fff5f5; border-color: #ffe3e3; }
-    .scenario-card:nth-child(5) .scenario-icon { background: rgba(244, 63, 94, 0.08); color: #e11d48; }
+    .scenario-card:nth-child(5) { background-color: #fdf4ff; border-color: #fae8ff; }
+    .scenario-card:nth-child(5) .scenario-icon { background: rgba(217, 70, 239, 0.08); color: #c026d3; }
 
-    .scenario-card:nth-child(6) { background-color: #f0fdfa; border-color: #ccfbf1; }
-    .scenario-card:nth-child(6) .scenario-icon { background: rgba(13, 148, 136, 0.08); color: #0d9488; }
+    .scenario-card:nth-child(6) { background-color: #fff1f2; border-color: #ffe4e6; }
+    .scenario-card:nth-child(6) .scenario-icon { background: rgba(244, 63, 94, 0.08); color: #e11d48; }
 
     .scenario-icon {
       width: 36px;
@@ -350,8 +350,8 @@
 
     .feature-card:hover {
       transform: translateY(-4px);
-      border-color: rgba(2, 132, 199, 0.15);
-      box-shadow: 0 10px 25px rgba(2, 132, 199, 0.04);
+      border-color: rgba(79, 70, 229, 0.15);
+      box-shadow: 0 10px 25px rgba(79, 70, 229, 0.04);
     }
 
     .feature-card:hover::before {
@@ -359,22 +359,22 @@
     }
 
     /* Diverse Light Pastel Backgrounds for Feature Cards */
-    .feature-card:nth-child(1) { background-color: #f0f9ff; border-color: #e0f2fe; }
-    .feature-card:nth-child(1) .feature-icon-wrapper { background: rgba(2, 132, 199, 0.08); color: #0284c7; }
+    .feature-card:nth-child(1) { background-color: #f5f3ff; border-color: #ede9fe; }
+    .feature-card:nth-child(1) .feature-icon-wrapper { background: rgba(79, 70, 229, 0.08); color: #4f46e5; }
 
-    .feature-card:nth-child(2) { background-color: #f0fdf4; border-color: #dcfce7; }
-    .feature-card:nth-child(2) .feature-icon-wrapper { background: rgba(16, 185, 129, 0.08); color: #10b981; }
+    .feature-card:nth-child(2) { background-color: #ecfeff; border-color: #cffafe; }
+    .feature-card:nth-child(2) .feature-icon-wrapper { background: rgba(6, 182, 212, 0.08); color: #0891b2; }
 
-    .feature-card:nth-child(3) { background-color: #f5f3ff; border-color: #ede9fe; }
+    .feature-card:nth-child(3) { background-color: #faf5ff; border-color: #f3e8ff; }
     .feature-card:nth-child(3) .feature-icon-wrapper { background: rgba(139, 92, 246, 0.08); color: #7c3aed; }
 
-    .feature-card:nth-child(4) { background-color: #e0f2fe; border-color: #bae6fd; }
-    .feature-card:nth-child(4) .feature-icon-wrapper { background: rgba(14, 165, 233, 0.08); color: #0284c7; }
+    .feature-card:nth-child(4) { background-color: #f0f9ff; border-color: #e0f2fe; }
+    .feature-card:nth-child(4) .feature-icon-wrapper { background: rgba(2, 132, 199, 0.08); color: #0284c7; }
 
-    .feature-card:nth-child(5) { background-color: #fffbeb; border-color: #fef3c7; }
-    .feature-card:nth-child(5) .feature-icon-wrapper { background: rgba(245, 158, 11, 0.08); color: #d97706; }
+    .feature-card:nth-child(5) { background-color: #fdf4ff; border-color: #fae8ff; }
+    .feature-card:nth-child(5) .feature-icon-wrapper { background: rgba(217, 70, 239, 0.08); color: #c026d3; }
 
-    .feature-card:nth-child(6) { background-color: #fff5f5; border-color: #ffe3e3; }
+    .feature-card:nth-child(6) { background-color: #fff1f2; border-color: #ffe4e6; }
     .feature-card:nth-child(6) .feature-icon-wrapper { background: rgba(244, 63, 94, 0.08); color: #e11d48; }
 
     .feature-icon-wrapper {
@@ -464,7 +464,7 @@
     .step-item:hover .step-badge {
       border-color: var(--accent-color);
       color: var(--accent-color);
-      background: rgba(2, 132, 199, 0.06);
+      background: rgba(79, 70, 229, 0.06);
       box-shadow: 0 0 10px var(--accent-glow);
     }
 
@@ -567,7 +567,7 @@
       width: 32px;
       height: 32px;
       border-radius: 6px;
-      background: rgba(2, 132, 199, 0.05);
+      background: rgba(79, 70, 229, 0.05);
       border: 1px solid var(--glass-border);
       display: flex;
       align-items: center;
@@ -706,7 +706,7 @@
     }
 
     .faq-card:hover {
-      border-color: rgba(2, 132, 199, 0.2);
+      border-color: rgba(79, 70, 229, 0.2);
     }
 
     .faq-card h4 {
@@ -863,9 +863,9 @@
   <svg style="position: absolute; width: 0; height: 0;" aria-hidden="true" focusable="false">
     <defs>
       <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#0284c7" />
-        <stop offset="50%" stop-color="#0d9488" />
-        <stop offset="100%" stop-color="#10b981" />
+        <stop offset="0%" stop-color="#4f46e5" />
+        <stop offset="50%" stop-color="#7c3aed" />
+        <stop offset="100%" stop-color="#06b6d4" />
       </linearGradient>
     </defs>
   </svg>
@@ -877,7 +877,7 @@
         <svg viewBox="0 0 24 24">
           <path d="M20,2H4C2.9,2,2,2.9,2,4v16c0,1.1,0.9,2,2,2h16c1.1,0,2-0.9,2-2V4C22,2.9,21.1,2,20,2z M20,16H4V4h16V16z M6,12h8v2H6V12z M6,8h12v2H6V8z"/>
         </svg>
-        <span>Studio0808 LiveCaption</span>
+        <span>Studio0808 LiveCaption(全球語系版本)</span>
       </div>
       <nav>
         <ul>
@@ -893,6 +893,9 @@
               <option value="en">English</option>
               <option value="ja">日本語</option>
               <option value="ko">한국어</option>
+              <option value="es">Español</option>
+              <option value="fr">Français</option>
+              <option value="de">Deutsch</option>
             </select>
           </li>
         </ul>
@@ -903,9 +906,12 @@
   <!-- Hero Section -->
   <section class="hero">
     <div class="container">
-      <div class="hero-badge" data-i18n="hero-badge">OFFLINE-FIRST REAL-TIME TRANSLATION</div>
+            <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+        <div class="hero-badge" data-i18n="hero-badge" style="margin-bottom: 0;">OFFLINE-FIRST REAL-TIME TRANSLATION</div>
+        <div class="hero-badge" data-i18n="version-info" style="margin-bottom: 0; background: rgba(6, 182, 212, 0.06); border-color: rgba(6, 182, 212, 0.15); color: #0891b2;">V20260626</div>
+      </div>
       <h1 data-i18n="hero-title">精準、即時的<span>網頁影音雙語字幕</span></h1>
-      <p data-i18n="hero-desc">Studio0808 LiveCaption 是一套專為瀏覽器影片設計的即時語音識別與雙語字幕翻譯系統。完全在您的本機電腦執行，擁有 100% 的隱私保護與極低延遲的速度。</p>
+      <p data-i18n="hero-desc">Studio0808 LiveCaption(全球語系版本) 是一套專為瀏覽器影片設計的即時語音識別與雙語字幕翻譯系統。完全在您的本機電腦執行，擁有 100% 的隱私保護與極低延遲的速度。</p>
       <div class="hero-buttons">
         <a href="https://drive.google.com/file/d/1mepxzOthPV2NeWjwenk8yNsSSB0vaJGF/view?usp=sharing" target="_blank" class="btn btn-primary" data-i18n="btn-download">下載離線整合包 (Windows)</a>
         <a href="#steps" class="btn btn-secondary" data-i18n="btn-start">開始使用</a>
@@ -997,8 +1003,8 @@
               <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
             </svg>
           </div>
-          <h3>影音創作者快速逐字稿</h3>
-          <p>創作者在整理國外參考影片、產出腳本或進行訪談記錄時，可利用後端自動存檔功能直接匯出整份 Markdown 對話紀錄，大幅節省時間。</p>
+          <h3 data-i18n="s6-title">影音創作者快速逐字稿</h3>
+          <p data-i18n="s6-desc">創作者在整理國外參考影片、產出腳本或進行訪談記錄時，可利用後端自動存檔功能直接匯出整份 Markdown 對話紀錄，大幅節省時間。</p>
         </div>
       </div>
     </div>
@@ -1008,8 +1014,8 @@
   <section id="features" class="features-section">
     <div class="container">
       <div class="section-title-wrapper">
-        <h2 class="section-title">功能與設計特色</h2>
-        <p class="section-subtitle">專為流暢體驗而生的現代化影音輔助工具</p>
+        <h2 class="section-title" data-i18n="title-features">功能與設計特色</h2>
+        <p class="section-subtitle" data-i18n="sub-features">專為流暢體驗而生的現代化影音輔助工具</p>
       </div>
 
       <div class="features-grid">
@@ -1022,8 +1028,8 @@
               <line x1="12" x2="12" y1="19" y2="22"/>
             </svg>
           </div>
-          <h3>極低延遲分頁音訊擷取</h3>
-          <p>藉由 Chrome Extension 獨創的分頁音訊 Loopback 機制，精準擷取分頁播放的音軌（不影響電腦其他音訊與錄音設備），提供給後端進行極低延遲的語音辨識。</p>
+          <h3 data-i18n="f1-title">極低延遲分頁音訊擷取</h3>
+          <p data-i18n="f1-desc">藉由 Chrome Extension 獨創的分頁音訊 Loopback 機制，精準擷取分頁播放的音軌（不影響電腦其他音訊與錄音設備），提供給後端進行極低延遲的語音辨識。</p>
         </div>
 
         <!-- Feature 2 -->
@@ -1035,8 +1041,8 @@
               <path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 15h3M1 9h3M1 15h3" stroke-linecap="round"/>
             </svg>
           </div>
-          <h3>本機離線 AI 語音辨識</h3>
-          <p>後端搭載 Sherpa-ONNX 架構與阿里巴巴開源的 SenseVoice-Small 語音大模型，支援中、英、日、韓、粵語等語音，離線解碼速度極快，準確度極高。</p>
+          <h3 data-i18n="f2-title">本機離線 AI 語音辨識</h3>
+          <p data-i18n="f2-desc">後端搭載 Sherpa-ONNX 架構與阿里巴巴開源的 SenseVoice-Small 語音大模型，支援中、英、日、韓、粵語等語音，離線解碼速度極快，準確度極高。</p>
         </div>
 
         <!-- Feature 3 -->
@@ -1048,8 +1054,8 @@
               <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
             </svg>
           </div>
-          <h3>自由切換翻譯引擎</h3>
-          <p>支援強大的本機 Ollama 推理框架（推薦使用 Qwen 2.5 3B 模型）進行全離線智能意譯；同時支援線上 DeepSeek 雲端 API，以極低的成本取得接近人工翻譯的語意品質。</p>
+          <h3 data-i18n="f3-title">自由切換翻譯引擎</h3>
+          <p data-i18n="f3-desc">支援強大的本機 Ollama 推理框架（推薦使用 Qwen 2.5 3B 模型）進行全離線智能意譯；同時支援線上 DeepSeek 雲端 API，以極低的成本取得接近人工翻譯的語意品質。</p>
         </div>
 
         <!-- Feature 4 -->
@@ -1061,8 +1067,8 @@
               <polyline points="2 12 12 17 22 12"/>
             </svg>
           </div>
-          <h3>高顏值字幕懸浮視窗</h3>
-          <p>精心設計的毛玻璃 (Glassmorphism) 半透明質感底框，支援字體大小自訂，具備完美的滑鼠穿透（不影響影片操作）。支援手勢拖拽定位與雙擊位置重置。</p>
+          <h3 data-i18n="f4-title">高顏值字幕懸浮視窗</h3>
+          <p data-i18n="f4-desc">精心設計的毛玻璃 (Glassmorphism) 半透明質感底框，支援字體大小自訂，具備完美的滑鼠穿透（不影響影片操作）。支援手勢拖拽定位與雙擊位置重置。</p>
         </div>
 
         <!-- Feature 5 -->
@@ -1074,8 +1080,8 @@
               <path d="M12 7v5l4 2"/>
             </svg>
           </div>
-          <h3>多行歷史字幕滾動</h3>
-          <p>可選擇保留「最新 + 前 1 句」或「最新 + 前 2 句」的歷史字幕，舊字幕會以半透明、縮小解碼在上方滾動，避免字幕跳過快而漏看。</p>
+          <h3 data-i18n="f5-title">多行歷史字幕滾動</h3>
+          <p data-i18n="f5-desc">可選擇保留「最新 + 前 1 句」或「最新 + 前 2 句」的歷史字幕，舊字幕會以半透明、縮小解碼在上方滾動，避免字幕跳過快而漏看。</p>
         </div>
 
         <!-- Feature 6 -->
@@ -1085,8 +1091,8 @@
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             </svg>
           </div>
-          <h3>100% 離線隱私安全</h3>
-          <p>若使用本機辨識與 Ollama 本地翻譯模型，所有音訊擷取、語音辨識、模型翻譯與字幕繪製皆在本機完成，無須連網，資料絕對不外洩。</p>
+          <h3 data-i18n="f6-title">100% 離線隱私安全</h3>
+          <p data-i18n="f6-desc">若使用本機辨識與 Ollama 本地翻譯模型，所有音訊擷取、語音辨識、模型翻譯與字幕繪製皆在本機完成，無須連網，資料絕對不外洩。</p>
         </div>
       </div>
     </div>
@@ -1096,8 +1102,8 @@
   <section id="steps" class="steps-section">
     <div class="container">
       <div class="section-title-wrapper">
-        <h2 class="section-title">快速安裝與啟動步驟</h2>
-        <p class="section-subtitle">只需三步，即可在瀏覽器中開啟即時翻譯字幕</p>
+        <h2 class="section-title" data-i18n="title-steps">快速安裝與啟動步驟</h2>
+        <p class="section-subtitle" data-i18n="sub-steps">只需四步，即可在瀏覽器中開啟即時翻譯字幕</p>
       </div>
 
       <div class="steps-flow">
@@ -1105,13 +1111,12 @@
         <div class="step-item">
           <div class="step-badge">1</div>
           <div class="step-content">
-            <h3>啟動後端伺服器 (Backend Server)</h3>
-            <p>後端伺服器負責接收 Chrome 傳來的音訊、透過 VAD 斷句、SenseVoice 模型辨識與 LLM 翻譯。</p>
+            <h3 data-i18n="step1-title">第一步：安裝與設定 Ollama 本地翻譯服務</h3>
+            <p data-i18n="step1-desc">本系統預設採用 Ollama 進行 100% 離線 AI 意譯。首次使用請先安裝並啟動 Llama 服務。</p>
             <div class="step-details">
               <ul>
-                <li>若下載的是整合發布包，請進入【LiveCaptionServer】資料夾雙擊執行：<br><strong><code>點我啟動後端服務.bat</code></strong>。</li>
-                <li>程式啟動時會檢測模型是否存在，若為首次使用，將會自動連線下載語音辨識模型。</li>
-                <li>啟動成功後，終端機將會顯示：<br><code>INFO: Uvicorn running on http://127.0.0.1:8000</code>，請保持該視窗開啟。</li>
+                <li data-i18n="step1-d1">前往 <a href="https://ollama.com" target="_blank" style="color: var(--accent-color); font-weight: 600; text-decoration: none;">Ollama 官方網站</a> 下載並安裝。安裝後，工作列右下角將出現小羊駝 🦙 圖示，並常駐後台開機啟動（預設埠為 11434）。</li>
+                <li data-i18n="step1-d2">開啟 CMD 或 PowerShell 終端機，執行指令 <code>ollama run qwen2.5:3b-instruct</code>（推薦，速度極快且顯存佔用低）或 <code>ollama run qwen2.5:7b-instruct</code>（翻譯品質最優），自動下載模型並常駐本機，無需在特定目錄下載。</li>
               </ul>
             </div>
           </div>
@@ -1121,15 +1126,13 @@
         <div class="step-item">
           <div class="step-badge">2</div>
           <div class="step-content">
-            <h3>載入 Chrome 瀏覽器外掛 (Extension)</h3>
-            <p>外掛負責擷取當前分頁的音訊，並將即時字幕繪製在網頁畫面上。</p>
+            <h3 data-i18n="step2-title">第二步：啟動後端伺服器 (Backend Server)</h3>
+            <p data-i18n="step2-desc">後端伺服器內建了 Whisper 多國語言高精度引擎與 SenseVoice 極速引擎，負責接收音訊、斷句與模型辨識。</p>
             <div class="step-details">
               <ul>
-                <li>在 Chrome 瀏覽器網址列輸入並前往 <strong><code>chrome://extensions/</code></strong></li>
-                <li>在右上角開啟 <strong>「開發者模式」 (Developer Mode)</strong> 開關。</li>
-                <li>點擊左上角的 <strong>「載入已解壓縮擴充功能」 (Load unpacked)</strong> 按鈕。</li>
-                <li>選擇專案資料夾底下的 <strong><code>extension</code></strong> 資料夾載入。</li>
-                <li>確認 Chrome 工具列已出現 <strong>Studio0808 LiveCaption</strong> 的圖示。</li>
+                <li data-i18n="step2-d1">若您尚未下載，請先 <a href="https://drive.google.com/file/d/1mepxzOthPV2NeWjwenk8yNsSSB0vaJGF/view?usp=sharing" target="_blank" style="color: var(--accent-color); font-weight: 600; text-decoration: none;">點此下載離線整合包</a>。解壓縮後，進入【LiveCaptionServer】資料夾雙擊執行：<br><strong><code>點我啟動【即時字幕】後端服務.bat</code></strong>。</li>
+                <li data-i18n="step2-d2">程式啟動時會檢測模型，若是首次辨識，後端會自動下載並加載 VAD 斷句與語音辨識模型（如 SenseVoice-Small / Whisper 核心）。</li>
+                <li data-i18n="step2-d3">啟動成功後，終端機將顯示：<br><code>INFO: Uvicorn running on http://127.0.0.1:8000</code>，請保持該視窗開啟。</li>
               </ul>
             </div>
           </div>
@@ -1139,14 +1142,30 @@
         <div class="step-item">
           <div class="step-badge">3</div>
           <div class="step-content">
-            <h3>開啟影片，開始擷取與翻譯</h3>
-            <p>一切就緒，開啟您想觀看的任何影片分頁。</p>
+            <h3 data-i18n="step3-title">第三步：載入 Chrome 瀏覽器外掛 (Extension)</h3>
+            <p data-i18n="step3-desc">外掛負責擷取當前分頁的音訊，並將即時字幕渲染在網頁畫面上。</p>
             <div class="step-details">
               <ul>
-                <li>前往 YouTube 或任何影片網站播放影片。</li>
-                <li>點擊擴充功能圖示開啟設定面板，點擊 <strong>「啟動即時字幕」</strong>按鈕。</li>
-                <li>點擊後，網頁底部將會彈出毛玻璃風格的字幕懸浮框，顯示：<br><code>語音系統已連線，準備辨識中...</code></li>
-                <li>只要影片中有說話聲音，字幕將會即時辨識並流暢顯示於畫面上！</li>
+                <li data-i18n="step3-d1">在 Chrome 瀏覽器網址列輸入並前往 <strong><code>chrome://extensions/</code></strong></li>
+                <li data-i18n="step3-d2">在右上角開啟 <strong>「開發者模式」 (Developer Mode)</strong> 開關。</li>
+                <li data-i18n="step3-d3">點擊左上角的 <strong>「載入已解壓縮擴充功能」 (Load unpacked)</strong> 按鈕，並選取專案底下的 <strong><code>extension</code></strong> 資料夾。</li>
+                <li data-i18n="step3-d4">確認 Chrome 工具列已出現 <strong>Studio0808 LiveCaption(全球語系版本)</strong> 的圖示。</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-item">
+          <div class="step-badge">4</div>
+          <div class="step-content">
+            <h3 data-i18n="step4-title">第四步：開啟影片，開始擷取與翻譯</h3>
+            <p data-i18n="step4-desc">一切就緒，開啟您想觀看的任何影片或直播分頁。</p>
+            <div class="step-details">
+              <ul>
+                <li data-i18n="step4-d1">前往 YouTube、Twitch 或任何影音網站播放影片。</li>
+                <li data-i18n="step4-d2">點擊擴充功能圖示開啟設定面板，翻譯服務選擇 <code>Ollama</code>，並於下拉選單中選擇您下載的模型（如 <code>qwen2.5:3b-instruct</code>）。</li>
+                <li data-i18n="step4-d3">點擊 <strong>「啟動即時字幕」</strong>按鈕。只要影片中有說話聲音，字幕將會以 Whisper/SenseVoice 即時辨識，並經由 Ollama 翻譯流暢顯示於畫面上！</li>
               </ul>
             </div>
           </div>
@@ -1317,7 +1336,7 @@
             這是因為 Chrome 判定該影片分頁已經有音訊擷取行程正在執行。這通常是因為外掛背景腳本自動休眠重啟、狀態不同步導致。<br>
             <strong>解決方法：</strong><br>
             1. <strong>重新整理影片網頁：</strong>直接按下 <code>F5</code> 重新整理播放影片的網頁，這會強制釋放該分頁被佔用的所有音軌。<br>
-            2. <strong>重載擴充功能：</strong>在 <code>chrome://extensions/</code> 中點選 Studio0808 LiveCaption 的「重新整理」圖示，徹底重啟背景程式即可。
+            2. <strong>重載擴充功能：</strong>在 <code>chrome://extensions/</code> 中點選 Studio0808 LiveCaption(全球語系版本) 的「重新整理」圖示，徹底重啟背景程式即可。
           </p>
         </div>
 
@@ -1431,8 +1450,76 @@
             </ul>
           </div>
         </div>
+
+        <!-- Q11 (Ollama Installation and Config) -->
+        <div class="faq-card">
+          <h4>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+            <span data-i18n="faq11-title">問題 11：如何安裝與設定 Ollama 本機離線翻譯？不同模型的效能與翻譯品質有何差異？</span>
+          </h4>
+          <div class="faq-desc" data-i18n="faq11-desc">
+            本系統支援 Ollama 離線翻譯框架，實現 100% 本地運行的隱私字幕翻譯。請參考以下指引進行安裝與模型選擇：
+            <ol>
+              <li><strong>下載與安裝</strong>：造訪 <a href="https://ollama.com" target="_blank" style="color: var(--accent-color); font-weight: 600; text-decoration: none;">Ollama 官方網站</a> 下載並安裝。安裝後，Windows 工作列右下角會出現<strong>小羊駝圖示 🦙</strong>，並會隨開機自動啟動待命（預設服務網址為 <code>http://127.0.0.1:11434</code>）。</li>
+              <li><strong>下載模型</strong>：開啟 CMD 終端機，執行 <code>ollama run qwen2.5:7b-instruct</code> 或 <code>ollama run qwen2.5:3b-instruct</code> 即可自動下載模型，下載完成後隨即常駐本機，無需在特定目錄執行。</li>
+              <li><strong>外掛設定與下拉選用</strong>：開啟 Chrome 外掛設定面板，翻譯服務選用 <code>Ollama</code>，並可在「翻譯模型名稱」下拉選單中直接點選已下載的模型。</li>
+              <li><strong>模型效能與品質差異比較</strong>：
+                <ul>
+                  <li><strong>qwen2.5:7b-instruct (7B)</strong>：約 4.7 GB。需要 5~6 GB 以上的顯卡記憶體。優點是翻譯品質極佳，繁中意譯語法非常流暢，100% 不會出現中英夾雜或語系溢出；缺點是生成時間稍長，在即時字幕中會感覺到 1~2 秒的些微延遲。</li>
+                  <li><strong>qwen2.5:3b-instruct (3B)</strong>：約 2.2 GB。僅需 2.5 GB 左右的顯卡記憶體。優點是翻譯反應極快（速度比 7B 快 2 倍以上），延遲幾乎難以察覺；缺點是受限於參數量，偶爾在日常會話中會夾雜少數英文單字（如將「散步」翻成 "stroll"，或「做家事」翻成 "cleaning 倉庫"），長句時偶爾會直接輸出英文。</li>
+                  <li><strong>gemma2:2b-instruct (2B)</strong>：約 1.6 GB。只需 1.8 GB 的顯卡記憶體。速度極快，繁中生成效果優異，適合入門款顯卡或追求極速即時對應的使用者。</li>
+                </ul>
+              </li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Q12 (ASR Engine Comparison) -->
+        <div class="faq-card">
+          <h4>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+            <span data-i18n="faq12-title">問題 12：後端內建的 SenseVoice 與 Whisper 語音辨識引擎有何不同？各支援哪些國家的語言？</span>
+          </h4>
+          <div class="faq-desc" data-i18n="faq12-desc">
+            系統後端提供了兩款強大的離線 AI 語音辨識引擎，各有其優勢及語言相容範圍，您可以根據播放的影片內容隨時切換：
+            <ul>
+              <li><strong>SenseVoice-Small (亞太語系極速引擎)</strong>：
+                <ul>
+                  <li><strong>支援語言</strong>：<strong>中文（普通話/簡體/繁體）、英文、日文、韓文、粵語 (廣東話)</strong>。</li>
+                  <li><strong>引擎優點</strong>：解碼辨識速度快得驚人（百毫秒級別），佔用系統資源與顯存極低。具備語音事件偵測（如自動偵測笑聲、掌聲、BGM 等），並且會自動在辨識結果中加上高準確度的標點符號。</li>
+                  <li><strong>推薦場景</strong>：觀看中、英、日、韓、粵語影片，或是對即時性要求極高（例如視訊會議直播）時的首選。</li>
+                </ul>
+              </li>
+              <li><strong>Whisper (多國語言高精度引擎)</strong>：
+                <ul>
+                  <li><strong>支援語言</strong>：<strong>支援全球近百種語言的識別</strong>（包含法文、德文、西班牙文、義大利文、俄文、葡萄牙文、越南文、泰文等幾乎所有主要語系）。</li>
+                  <li><strong>引擎優點</strong>：在歐美語系及非亞太語系的辨識精度極佳，能完美處理發音中的背景雜音，並產出非常高質量的外語逐字稿。</li>
+                  <li><strong>推薦場景</strong>：觀看非亞太語系影片（例如法文教學、德文演講、西班牙影集）時的備用引擎。<em>注意：Whisper 模型結構較大，建議使用 GPU (CUDA) 加速運行以確保即時性。</em></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
 
+    </div>
+  </section>
+
+  <!-- Version Control Section -->
+  <section id="changelog" class="changelog-section" style="padding: 30px 0 40px; border-top: 1px solid var(--glass-border);">
+    <div class="container">
+      <div class="section-title-wrapper" style="margin-bottom: 25px;">
+        <h2 class="section-title" data-i18n="title-changelog">版本控制與更新紀錄</h2>
+        <p class="section-subtitle" data-i18n="version-info">版本更新日期：V20260626</p>
+      </div>
+      <div class="changelog-timeline" style="max-width: 800px; margin: 0 auto; background: var(--bg-secondary); border: 1px solid var(--glass-border); border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.01);">
+        <div class="changelog-item" style="border-bottom: 1px dashed var(--glass-border); padding-bottom: 16px; margin-bottom: 16px;">
+          <p data-i18n="changelog-item1" style="font-size: 14px; color: var(--text-secondary); line-height: 1.6;"></p>
+        </div>
+        <div class="changelog-item">
+          <p data-i18n="changelog-item2" style="font-size: 14px; color: var(--text-secondary); line-height: 1.6;"></p>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -1466,15 +1553,21 @@
 
       // Update window document title
       if (lang === 'zh-TW') {
-        document.title = "即時字幕 - Studio0808";
+        document.title = "即時字幕 - Studio0808 LiveCaption(全球語系版本)";
       } else if (lang === 'zh-CN') {
-        document.title = "即时字幕 - Studio0808";
+        document.title = "即时字幕 - Studio0808 LiveCaption(全球语系版本)";
       } else if (lang === 'en') {
-        document.title = "Real-Time Subtitles - Studio0808";
+        document.title = "Real-Time Subtitles - Studio0808 LiveCaption (Global Version)";
       } else if (lang === 'ja') {
-        document.title = "リアルタイム字幕 - Studio0808";
+        document.title = "リアルタイム字幕 - Studio0808 LiveCaption(グローバル版)";
       } else if (lang === 'ko') {
-        document.title = "실시간 자막 - Studio0808";
+        document.title = "실시간 자막 - Studio0808 LiveCaption(글로벌 버전)";
+      } else if (lang === 'es') {
+        document.title = "Subtítulos en tiempo real - Studio0808 LiveCaption (Versión Global)";
+      } else if (lang === 'fr') {
+        document.title = "Sous-titres en temps réel - Studio0808 LiveCaption (Version Globale)";
+      } else if (lang === 'de') {
+        document.title = "Echtzeit-Untertitel - Studio0808 LiveCaption (Globale Version)";
       }
 
       // Keep user choice
@@ -1498,10 +1591,16 @@
             savedLang = 'ja';
           } else if (browserLang.startsWith('ko')) {
             savedLang = 'ko';
+          } else if (browserLang.startsWith('es')) {
+            savedLang = 'es';
+          } else if (browserLang.startsWith('fr')) {
+            savedLang = 'fr';
+          } else if (browserLang.startsWith('de')) {
+            savedLang = 'de';
           } else if (browserLang.startsWith('zh') || browserLang.startsWith('tw')) {
             savedLang = 'zh-TW';
           } else {
-            savedLang = 'zh-TW'; // Default to zh-TW
+            savedLang = 'en'; // Default to English for global audience
           }
         }
         

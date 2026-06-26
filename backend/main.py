@@ -1,7 +1,49 @@
 import os
+import sys
 import re
 import json
 import asyncio
+from pathlib import Path
+
+# Add NVIDIA pip packages' DLL paths to Windows DLL search directory
+def add_nvidia_dll_paths():
+    dll_dirs = []
+    
+    # 1. 偵測本機開發環境的 NVIDIA CUDA/cuDNN 依賴套件路徑
+    site_packages_nvidia = Path(sys.prefix) / "Lib" / "site-packages" / "nvidia"
+    if site_packages_nvidia.exists() and site_packages_nvidia.is_dir():
+        print(f"偵測到本機 NVIDIA 依賴套件路徑: {site_packages_nvidia}")
+        for path in site_packages_nvidia.glob("**/bin"):
+            if path.is_dir():
+                dll_dirs.append(str(path.resolve()))
+                
+    # 2. 針對 PyInstaller 打包後的路徑，尋找根目錄與 sherpa_onnx DLL 目錄
+    if getattr(sys, 'frozen', False):
+        base_dir = os.path.dirname(sys.executable)
+        # 增加根目錄 (內含 CUDA/cuDNN DLLs)
+        dll_dirs.append(base_dir)
+        
+        # 增加 _internal/sherpa_onnx/lib (內含 sherpa-onnx, onnxruntime DLLs)
+        sherpa_lib_dir = os.path.join(base_dir, "_internal", "sherpa_onnx", "lib")
+        if os.path.exists(sherpa_lib_dir):
+            dll_dirs.append(sherpa_lib_dir)
+
+    # 執行載入
+    for dll_dir in dll_dirs:
+        try:
+            if hasattr(os, 'add_dll_directory'):
+                os.add_dll_directory(dll_dir)
+                print(f"已成功載入 DLL 目錄 (add_dll_directory): {dll_dir}")
+        except Exception as e:
+            print(f"載入 DLL 目錄 {dll_dir} 失敗 (add_dll_directory): {e}")
+            
+    if dll_dirs:
+        # 同時將這些目錄加入 PATH 環境變數，確保 C++ 底層 DLL 可以透過傳統搜尋尋找到依賴項
+        os.environ["PATH"] = ";".join(dll_dirs) + ";" + os.environ["PATH"]
+        print("已將所有依賴 DLL 目錄加入 OS PATH 變數！")
+
+add_nvidia_dll_paths()
+
 import numpy as np
 import httpx
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -40,20 +82,19 @@ SENSE_VOICE_DIR = os.path.join(BASE_DIR, "sherpa-onnx-sense-voice-zh-en-ja-ko-yu
 SENSE_VOICE_MODEL = os.path.join(SENSE_VOICE_DIR, "model.int8.onnx")
 SENSE_VOICE_TOKENS = os.path.join(SENSE_VOICE_DIR, "tokens.txt")
 
-# Global models initialized on startup
+# Global models initialized on startup / on demand
 vad_detector = None
 asr_recognizer = None
+current_asr_engine = None  # 追蹤當前加載的 ASR 引擎名稱："sensevoice" 或 "whisper"
+current_whisper_lang = None  # 追蹤當前 Whisper 加載的語言
 
-def init_models():
-    global vad_detector, asr_recognizer
-    if vad_detector is not None and asr_recognizer is not None:
+def init_vad():
+    global vad_detector
+    if vad_detector is not None:
         return
-    
     if not os.path.exists(VAD_MODEL_PATH):
         raise FileNotFoundError(f"找不到 VAD 模型: {VAD_MODEL_PATH}，請先執行 download_models.py")
-    if not os.path.exists(SENSE_VOICE_MODEL):
-        raise FileNotFoundError(f"找不到 SenseVoice 模型: {SENSE_VOICE_MODEL}，請先執行 download_models.py")
-        
+    
     print("正在初始化 Silero VAD 模型...")
     vad_config = sherpa_onnx.VadModelConfig(
         silero_vad=sherpa_onnx.SileroVadModelConfig(
@@ -66,15 +107,137 @@ def init_models():
         sample_rate=16000,
     )
     vad_detector = sherpa_onnx.VoiceActivityDetector(vad_config, buffer_size_in_seconds=30)
+
+def release_asr_model():
+    global asr_recognizer, current_asr_engine, current_whisper_lang
+    if asr_recognizer is not None:
+        print(f"正在卸載當前 AI 模型資源 ({current_asr_engine})...")
+        asr_recognizer = None
+        current_asr_engine = None
+        current_whisper_lang = None
+        import gc
+        gc.collect()
+        print("資源釋放完成。")
+
+def init_sensevoice():
+    global asr_recognizer, current_asr_engine
+    if asr_recognizer is not None and current_asr_engine == "sensevoice":
+        return
+        
+    release_asr_model()
     
-    print("正在初始化 SenseVoice ASR 模型...")
-    asr_recognizer = sherpa_onnx.OfflineRecognizer.from_sense_voice(
-        model=SENSE_VOICE_MODEL,
-        tokens=SENSE_VOICE_TOKENS,
-        num_threads=4,
-        use_itn=True,
-    )
-    print("所有離線 AI 模型載入成功！")
+    if not os.path.exists(SENSE_VOICE_MODEL):
+        raise FileNotFoundError(f"找不到 SenseVoice 模型: {SENSE_VOICE_MODEL}，請先執行 download_models.py")
+        
+    # 嘗試以 GPU (CUDA) 載入，若失敗則 Fallback 到 CPU 載入
+    try:
+        print("嘗試以 GPU (CUDA) 初始化 SenseVoice ASR 模型...")
+        asr_recognizer = sherpa_onnx.OfflineRecognizer.from_sense_voice(
+            model=SENSE_VOICE_MODEL,
+            tokens=SENSE_VOICE_TOKENS,
+            num_threads=4,
+            use_itn=True,
+            provider="cuda",
+        )
+        print("SenseVoice GPU (CUDA) 模型載入成功！")
+    except Exception as cuda_err:
+        print(f"SenseVoice GPU 初始化失敗 ({cuda_err})，將自動降級至 CPU 推理模式...")
+        asr_recognizer = sherpa_onnx.OfflineRecognizer.from_sense_voice(
+            model=SENSE_VOICE_MODEL,
+            tokens=SENSE_VOICE_TOKENS,
+            num_threads=4,
+            use_itn=True,
+            provider="cpu",
+        )
+        print("SenseVoice 離線 CPU 模型載入成功！")
+        
+    current_asr_engine = "sensevoice"
+    print("SenseVoice 離線 AI 模型載入成功！")
+
+def init_whisper(lang: str = "auto"):
+    global asr_recognizer, current_asr_engine, current_whisper_lang
+    
+    # 決定 whisper 語言代碼
+    whisper_lang = lang
+    if whisper_lang == "auto":
+        whisper_lang = ""
+    elif whisper_lang in ["zh-TW", "zh-CN"]:
+        whisper_lang = "zh"
+        
+    # 如果已加載 Whisper 且語言相同，就直接返回
+    if asr_recognizer is not None and current_asr_engine == "whisper" and current_whisper_lang == whisper_lang:
+        return
+        
+    release_asr_model()
+    
+    # 優先尋找 whisper-small，如果沒有則嘗試 whisper-base
+    WHISPER_DIR = os.path.join(BASE_DIR, "sherpa-onnx-whisper-small")
+    if not os.path.exists(WHISPER_DIR):
+        WHISPER_DIR = os.path.join(BASE_DIR, "sherpa-onnx-whisper-base")
+        
+    if not os.path.exists(WHISPER_DIR):
+        raise FileNotFoundError(f"找不到 Whisper 模型資料夾 (請執行 download_models.py): {WHISPER_DIR}")
+        
+    # 探測潛在檔名 (同時相容 small 和 base 規格)
+    possible_encoders = [
+        "whisper-small-encoder.int8.onnx", "whisper-small-encoder.onnx",
+        "small-encoder.int8.onnx", "small-encoder.onnx",
+        "whisper-base-encoder.int8.onnx", "whisper-base-encoder.onnx", 
+        "base-encoder.int8.onnx", "base-encoder.onnx", 
+        "encoder.int8.onnx", "encoder.onnx"
+    ]
+    possible_decoders = [
+        "whisper-small-decoder.int8.onnx", "whisper-small-decoder.onnx",
+        "small-decoder.int8.onnx", "small-decoder.onnx",
+        "whisper-base-decoder.int8.onnx", "whisper-base-decoder.onnx", 
+        "base-decoder.int8.onnx", "base-decoder.onnx", 
+        "decoder.int8.onnx", "decoder.onnx"
+    ]
+    possible_tokens = [
+        "whisper-small-tokens.txt", "small-tokens.txt",
+        "whisper-base-tokens.txt", "base-tokens.txt", "tokens.txt"
+    ]
+    
+    encoder_path = next((os.path.join(WHISPER_DIR, n) for n in possible_encoders if os.path.exists(os.path.join(WHISPER_DIR, n))), None)
+    decoder_path = next((os.path.join(WHISPER_DIR, n) for n in possible_decoders if os.path.exists(os.path.join(WHISPER_DIR, n))), None)
+    tokens_path = next((os.path.join(WHISPER_DIR, n) for n in possible_tokens if os.path.exists(os.path.join(WHISPER_DIR, n))), None)
+    
+    if not encoder_path or not decoder_path or not tokens_path:
+        raise FileNotFoundError(f"找不到完整的 Whisper 模型檔案 (需要 encoder, decoder, tokens) 於: {WHISPER_DIR}")
+        
+    # 嘗試以 GPU (CUDA) 載入，若失敗則 Fallback 到 CPU 載入
+    try:
+        print(f"嘗試以 GPU (CUDA) 初始化 Whisper ASR 模型 (語言: '{whisper_lang}' | 來源: '{lang}')...")
+        asr_recognizer = sherpa_onnx.OfflineRecognizer.from_whisper(
+            encoder=encoder_path,
+            decoder=decoder_path,
+            tokens=tokens_path,
+            num_threads=4,
+            language=whisper_lang,
+            task="transcribe",
+            provider="cuda",  # 啟用 CUDA GPU 推理
+        )
+        print("Whisper GPU (CUDA) 模型載入成功！")
+    except Exception as cuda_err:
+        print(f"GPU 初始化失敗 ({cuda_err})，將自動降級至 CPU 推理模式...")
+        asr_recognizer = sherpa_onnx.OfflineRecognizer.from_whisper(
+            encoder=encoder_path,
+            decoder=decoder_path,
+            tokens=tokens_path,
+            num_threads=4,
+            language=whisper_lang,
+            task="transcribe",
+            provider="cpu",
+        )
+        print("Whisper 離線 CPU 模型載入成功！")
+        
+    current_asr_engine = "whisper"
+    current_whisper_lang = whisper_lang
+    print("Whisper 離線 AI 模型載入成功！")
+
+def init_models():
+    # 啟動時只初始化 VAD，ASR 延遲到 WebSocket 連線與配置時載入
+    init_vad()
 
 # 追蹤閒置連線與釋放記憶體/顯存相關變數
 active_connections = 0
@@ -91,12 +254,13 @@ async def monitor_idle_timeout():
         await asyncio.sleep(30)  # 每 30 秒檢查一次
         if active_connections == 0 and last_active_time is not None:
             elapsed = time.time() - last_active_time
-            if elapsed >= IDLE_TIMEOUT and asr_recognizer is not None:
-                print(f"後端閒置已達 {IDLE_TIMEOUT // 60} 分鐘，開始主動釋放 AI 模型資源...")
-                asr_recognizer = None
-                vad_detector = None
-                gc.collect()
-                print("後端 AI 模型資源釋放完成！")
+            if elapsed >= IDLE_TIMEOUT:
+                if asr_recognizer is not None or vad_detector is not None:
+                    print(f"後端閒置已達 {IDLE_TIMEOUT // 60} 分鐘，開始主動釋放 AI 模型資源...")
+                    release_asr_model()
+                    vad_detector = None
+                    gc.collect()
+                    print("後端 AI 模型資源釋放完成！")
 
 @app.on_event("startup")
 def startup_event():
@@ -156,7 +320,9 @@ async def translate_text(text: str, target_lang: str, ollama_url: str, model_nam
                 )
                 if response.status_code == 200:
                     res_json = response.json()
-                    return res_json["choices"][0]["message"]["content"].strip()
+                    translated = res_json["choices"][0]["message"]["content"].strip()
+                    print(f"  ➔ [DeepSeek 翻譯]")
+                    return translated
         except Exception as e:
             print(f"DeepSeek 翻譯失敗: {e}")
 
@@ -168,7 +334,7 @@ async def translate_text(text: str, target_lang: str, ollama_url: str, model_nam
                 f"原文字幕：{text}\n"
                 f"翻譯結果："
             )
-            async with httpx.AsyncClient(timeout=3.0) as client:
+            async with httpx.AsyncClient(timeout=15.0) as client:
                 response = await client.post(
                     f"{ollama_url}/api/generate",
                     json={
@@ -177,15 +343,20 @@ async def translate_text(text: str, target_lang: str, ollama_url: str, model_nam
                         "stream": False,
                         "options": {
                             "temperature": 0.3,
-                            "num_predict": 100
+                            "num_predict": 40
                         }
                     }
                 )
                 if response.status_code == 200:
                     res_json = response.json()
-                    return res_json.get("response", "").strip()
+                    translated = res_json.get("response", "").strip()
+                    print(f"  ➔ [Ollama 翻譯 ({model_name})]")
+                    return translated
         except Exception as e:
-            print("偵測到本機 Ollama 未啟動，本工作階段後續將自動跳過 Ollama，避免連線超時延遲。")
+            import traceback
+            print(f"本機 Ollama 翻譯調用失敗 ({type(e).__name__}: {e})。詳細錯誤資訊如下：")
+            traceback.print_exc()
+            print("本工作階段後續將自動跳過 Ollama，避免連線超時延遲。")
             ollama_online = False
 
     # 3. 終極備用：免費 Google Translate Web API (免 Key、免配置、即開即用)
@@ -203,11 +374,13 @@ async def translate_text(text: str, target_lang: str, ollama_url: str, model_nam
             if response.status_code == 200:
                 res_json = response.json()
                 translated = "".join([part[0] for part in res_json[0] if part[0]])
+                print(f"  ➔ [Google 翻譯]")
                 return translated.strip()
     except Exception as e:
         print(f"Google 翻譯失敗: {e}")
         
     # 如果都失敗，則返回原文字
+    print(f"  ➔ [所有翻譯引擎皆失敗，保留原文]")
     return f"[未翻譯] {text}"
 
 @app.websocket("/stream")
@@ -217,10 +390,9 @@ async def websocket_endpoint(websocket: WebSocket):
     active_connections += 1
     print(f"WebSocket 客戶端已連線。當前連線數: {active_connections}")
     
-    # 確保模型已載入
-    if asr_recognizer is None or vad_detector is None:
-        print("檢測到模型已被釋放，正在重新載入模型...")
-        init_models()
+    # 確保 VAD 已載入
+    if vad_detector is None:
+        init_vad()
         
     # 建立會議記錄存檔目錄與檔案
     import datetime
@@ -253,11 +425,12 @@ async def websocket_endpoint(websocket: WebSocket):
     local_vad = sherpa_onnx.VoiceActivityDetector(vad_config, buffer_size_in_seconds=30)
     
     # 設定選項 (預設為 Ollama 本地)
-    ollama_url = "http://localhost:11434"
-    model_name = "qwen2.5:3b-instruct"
+    ollama_url = "http://127.0.0.1:11434"
+    model_name = "qwen2.5:7b-instruct"
     deepseek_key = None
     source_lang = "auto"
     target_lang = "none"
+    asr_engine = "sensevoice"
 
     try:
         while True:
@@ -274,9 +447,16 @@ async def websocket_endpoint(websocket: WebSocket):
                         deepseek_key = config_data.get("deepseek_key", deepseek_key)
                         source_lang = config_data.get("source_lang", source_lang)
                         target_lang = config_data.get("target_lang", target_lang)
+                        asr_engine = config_data.get("asr_engine", asr_engine)
                         global ollama_online
                         ollama_online = True
                         
+                        # 動態加載或切換 ASR 引擎
+                        if asr_engine == "whisper":
+                            init_whisper(source_lang)
+                        else:
+                            init_sensevoice()
+                            
                         # 動態重新設定 VAD 參數以降低延遲
                         min_silence = config_data.get("min_silence", 0.5)
                         max_speech = config_data.get("max_speech", 10.0)
@@ -292,7 +472,7 @@ async def websocket_endpoint(websocket: WebSocket):
                             sample_rate=16000,
                         )
                         local_vad = sherpa_onnx.VoiceActivityDetector(vad_config, buffer_size_in_seconds=30)
-                        print(f"已更新後端設定: Ollama={ollama_url}, Model={model_name}, SourceLang={source_lang}, TargetLang={target_lang}")
+                        print(f"已更新後端設定: ASR={asr_engine}, Ollama={ollama_url}, Model={model_name}, SourceLang={source_lang}, TargetLang={target_lang}")
                         print(f"已動態更新 VAD 設定: min_silence={min_silence}s, max_speech={max_speech}s")
                 except Exception as e:
                     print(f"解析設定訊息或更新 VAD 失敗: {e}")
@@ -317,26 +497,40 @@ async def websocket_endpoint(websocket: WebSocket):
                     samples = speech_segment.samples
                     start_time = speech_segment.start
                     
-                    # 丟給 SenseVoice 解碼
-                    if len(samples) > 0 and asr_recognizer is not None:
+                    # 確保 ASR 模型已載入
+                    if len(samples) > 0:
+                        if asr_recognizer is None:
+                            if asr_engine == "whisper":
+                                init_whisper(source_lang)
+                            else:
+                                init_sensevoice()
+                                
                         stream = asr_recognizer.create_stream()
                         stream.accept_waveform(16000, samples)
                         asr_recognizer.decode_stream(stream)
                         
                         full_asr_text = stream.result.text
-                        raw_text = clean_sense_voice_text(full_asr_text)
+                        
+                        if current_asr_engine == "whisper":
+                            raw_text = full_asr_text.strip()
+                        else:
+                            raw_text = clean_sense_voice_text(full_asr_text)
                         
                         if raw_text:
                             # 偵測 ASR 識別語音標籤
                             recognized_lang = "auto"
-                            if "<|zh|>" in full_asr_text or "<|yue|>" in full_asr_text:
-                                recognized_lang = "zh"
-                            elif "<|en|>" in full_asr_text:
-                                recognized_lang = "en"
-                            elif "<|ja|>" in full_asr_text:
-                                recognized_lang = "ja"
-                            elif "<|ko|>" in full_asr_text:
-                                recognized_lang = "ko"
+                            if current_asr_engine == "whisper":
+                                if source_lang != "auto":
+                                    recognized_lang = source_lang
+                            else:
+                                if "<|zh|>" in full_asr_text or "<|yue|>" in full_asr_text:
+                                    recognized_lang = "zh"
+                                elif "<|en|>" in full_asr_text:
+                                    recognized_lang = "en"
+                                elif "<|ja|>" in full_asr_text:
+                                    recognized_lang = "ja"
+                                elif "<|ko|>" in full_asr_text:
+                                    recognized_lang = "ko"
 
                             # 判定是否需要翻譯
                             if target_lang == "none":

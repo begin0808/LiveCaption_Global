@@ -9,6 +9,14 @@ backend/*.spec
 backend/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-int8-2024-07-17/
 backend/silero_vad.onnx
 
+# Whisper model directories (downloaded via download_models.py, too large for git)
+backend/sherpa-onnx-whisper-base/
+backend/sherpa-onnx-whisper-small/
+
+# Release bundles & build output (distributed via Google Drive, not git)
+LiveCaption_V*.zip
+LiveCaption_V*/
+
 # 會議/影片逐字稿紀錄與測試暫存檔
 transcripts/
 backend/dummy_test.wav

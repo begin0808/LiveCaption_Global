@@ -9,6 +9,7 @@ MODEL_DIR = os.path.dirname(os.path.abspath(__file__))
 # Model download URLs
 SENSE_VOICE_URL = "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-int8-2024-07-17.tar.bz2"
 VAD_URL = "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/silero_vad.onnx"
+WHISPER_URL = "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-small.tar.bz2"
 
 def download_file(url, dest_path):
     print(f"正在下載: {url} -> {dest_path}")
@@ -57,6 +58,31 @@ def main():
             print("清除臨時壓縮檔。")
     else:
         print("SenseVoice-Small 資料夾已存在，跳過。")
+        
+    # 3. 下載並解壓縮 Whisper-small ONNX
+    whisper_archive = os.path.join(MODEL_DIR, "whisper-small.tar.bz2")
+    whisper_dir = os.path.join(MODEL_DIR, "sherpa-onnx-whisper-small")
+    
+    if not os.path.exists(whisper_dir):
+        print("--- 下載 Whisper-small ---")
+        if not os.path.exists(whisper_archive):
+            download_file(WHISPER_URL, whisper_archive)
+        
+        print("正在解壓縮 Whisper-small (這可能需要一些時間)...")
+        try:
+            with tarfile.open(whisper_archive, "r:bz2") as tar:
+                tar.extractall(path=MODEL_DIR)
+            print("解壓縮完成！")
+        except Exception as e:
+            print(f"解壓縮失敗: {e}")
+            return
+        
+        # 刪除壓縮檔
+        if os.path.exists(whisper_archive):
+            os.remove(whisper_archive)
+            print("清除臨時壓縮檔。")
+    else:
+        print("Whisper-small 資料夾已存在，跳過。")
         
     print("\n所有模型均已下載且設定完成！")
 

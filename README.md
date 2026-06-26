@@ -1,16 +1,17 @@
-# Studio0808 LiveCaption - 即時網頁影音雙語字幕系統
+# Studio0808 LiveCaption（全球語系版本）- 即時網頁影音雙語字幕系統
 
 [English Version](README_EN.md) | [繁體中文](README.md)
 
-👉 **線上多國語言手冊 (Live Manual)**: [https://begin0808.github.io/LiveCaption/](https://begin0808.github.io/LiveCaption/)
+👉 **線上多國語言手冊 (Live Manual)**: [https://begin0808.github.io/LiveCaption_Global/](https://begin0808.github.io/LiveCaption_Global/)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Platform: Windows | macOS](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS-brightgreen.svg)](#)
-[![ASR: SenseVoice](https://img.shields.io/badge/ASR-SenseVoice--Small-orange.svg)](#)
+[![ASR: Whisper + SenseVoice](https://img.shields.io/badge/ASR-Whisper%20%2B%20SenseVoice-orange.svg)](#)
+[![Languages: 100+](https://img.shields.io/badge/Languages-100%2B-blueviolet.svg)](#)
 
-Studio0808 LiveCaption 是一套專為瀏覽器影片設計的即時語音識別與雙語字幕翻譯系統。完全在您的本機電腦執行，擁有 100% 的隱私保護與極低延遲的解碼速度。
+Studio0808 LiveCaption（全球語系版本）是一套專為瀏覽器影片設計的即時語音識別與雙語字幕翻譯系統。後端整合 **Whisper 多國語言引擎**（支援法、德、西、義、俄、葡等全球近百種語言）與 **SenseVoice-Small 亞太極速引擎**（中、英、日、韓、粵），並搭載本機 **Ollama** 離線翻譯框架，完全在您的本機電腦執行，擁有 100% 的隱私保護與極低延遲的解碼速度。
 
-適合用於線上學習、聽障輔助、外語練習、全球直播觀看以及視訊會議記錄等多種多元應用場景。
+適合用於線上學習、聽障輔助、外語練習、全球直播觀看以及視訊會議記錄等多種多元應用場景。網頁手冊本身亦提供繁中、簡中、英、日、韓、西、法、德 8 種語系介面。
 
 ---
 
@@ -44,7 +45,7 @@ Studio0808 LiveCaption 是一套專為瀏覽器影片設計的即時語音識別
 ## ✨ 系統功能與特色
 
 *   **極低延遲分頁音訊擷取**：藉由 Chrome Extension 獨創的分頁音訊 Loopback 機制，精準擷取分頁播放的音軌（不影響電腦其他音訊與錄音設備）。
-*   **本機離線 AI 語音辨識**：後端搭載 Sherpa-ONNX 架構與阿里巴巴開源的 **SenseVoice-Small** 語音大模型，支援中、英、日、韓、粵語等語音，離線解碼速度極快，準確度高。
+*   **雙引擎本機離線 AI 語音辨識**：後端搭載 Sherpa-ONNX 架構，整合 **SenseVoice-Small**（中、英、日、韓、粵語亞太極速辨識）與 **Whisper**（法、德、西、義、俄等全球近百種語言高精度辨識）雙引擎，可依影片內容隨時切換，實現全球影片無障礙閱讀。
 *   **自由切換翻譯引擎**：支援本機 **Ollama** 推理框架（推薦搭配 Qwen 2.5 3B 模型）進行全離線翻譯；同時支援線上 **DeepSeek** 雲端 API，以極低成本取得高畫質雙語對照。
 *   **高顏值字幕懸浮視窗**：精心設計的毛玻璃 (Glassmorphism) 半透明質感底框，支援字體大小、顏色自訂，具備滑鼠穿透（不影響影片操作）、手勢拖拽定位與雙擊位置重置。
 *   **多行歷史字幕滾動**：可選擇保留 0 - 2 行歷史字幕，舊字幕會以半透明、縮小解碼在上方滾動，避免字幕跳過快而漏看。

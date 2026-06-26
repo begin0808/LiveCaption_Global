@@ -1,8 +1,13 @@
 {
   "manifest_version": 3,
-  "name": "Studio0808 LiveCaption",
-  "version": "1.0.0",
+  "name": "Studio0808 LiveCaption (全球語系版本)",
+  "version": "2026.06.26",
   "description": "即時影片語音翻譯雙語字幕外掛 (100% 本機與隱私)",
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
   "permissions": [
     "tabCapture",
     "offscreen",
@@ -13,7 +18,8 @@
     "<all_urls>"
   ],
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_icon": "icon48.png"
   },
   "background": {
     "service_worker": "background.js"

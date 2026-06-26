@@ -15,6 +15,7 @@ const bgColorInput = document.getElementById('bg-color');
 const textColorInput = document.getElementById('text-color');
 const fontSizeInput = document.getElementById('font-size');
 const historyLinesInput = document.getElementById('history-lines');
+const asrEngineInput = document.getElementById('asr-engine');
 
 let isCapturing = false;
 
@@ -60,7 +61,10 @@ const i18n = {
     labelMaxSpeech: '單句最長上限:',
     footerText: '100% 離線隱私保護 • Studio0808',
     second: '秒',
-    alertPermission: '無法取得音訊擷取權限，請確認頁面為可播放媒體的網頁。\n錯誤資訊: '
+    alertPermission: '無法取得音訊擷取權限，請確認頁面為可播放媒體的網頁。\n錯誤資訊: ',
+    labelAsrEngine: '語音辨識引擎',
+    optAsrSensevoice: 'SenseVoice (極速模式)',
+    optAsrWhisper: 'Whisper-Small (多國語言/GPU加速)'
   },
   'zh-CN': {
     subtitleDesc: '实时影片语音翻译字幕',
@@ -102,7 +106,10 @@ const i18n = {
     labelMaxSpeech: '单句最长上限:',
     footerText: '100% 离线隐私保护 • Studio0808',
     second: '秒',
-    alertPermission: '无法获取音频捕获权限，请确认页面为可播放媒体的网页。\n错误信息: '
+    alertPermission: '无法获取音频捕获权限，请确认页面为可播放媒体的网页。\n错误信息: ',
+    labelAsrEngine: '语音识别引擎',
+    optAsrSensevoice: 'SenseVoice (极速模式)',
+    optAsrWhisper: 'Whisper-Small (多国语言/GPU加速)'
   },
   'en': {
     subtitleDesc: 'Real-time Video Speech Translation Subtitles',
@@ -144,7 +151,10 @@ const i18n = {
     labelMaxSpeech: 'Max Speech Duration:',
     footerText: '100% Offline Privacy Protection • Studio0808',
     second: 's',
-    alertPermission: 'Failed to acquire audio capture permission. Please ensure the page contains playable media.\nError: '
+    alertPermission: 'Failed to acquire audio capture permission. Please ensure the page contains playable media.\nError: ',
+    labelAsrEngine: 'Speech Recognition Engine',
+    optAsrSensevoice: 'SenseVoice (Fast Mode)',
+    optAsrWhisper: 'Whisper-Small (Multilingual/GPU)'
   },
   'ja': {
     subtitleDesc: 'リアルタイムのビデオ音声翻訳字幕',
@@ -186,7 +196,10 @@ const i18n = {
     labelMaxSpeech: '単句最大時間:',
     footerText: '100% オフラインプライバシー保護 • Studio0808',
     second: '秒',
-    alertPermission: '音声キャプチャ権限を取得できませんでした。メディア再生可能なページであることを確認してください。\nエラー情報: '
+    alertPermission: '音声キャプチャ権限を取得できませんでした。メディア再生可能なページであることを確認してください。\nエラー情報: ',
+    labelAsrEngine: '音声認識エンジン',
+    optAsrSensevoice: 'SenseVoice (高速モード)',
+    optAsrWhisper: 'Whisper-Small (多言語/GPU)'
   },
   'ko': {
     subtitleDesc: '실시간 비디오 음성 번역 자막',
@@ -228,7 +241,10 @@ const i18n = {
     labelMaxSpeech: '한 줄 최대 시간:',
     footerText: '100% 오프라인 개인 정보 보호 • Studio0808',
     second: '초',
-    alertPermission: '오디오 캡처 권한을 가져오지 못했습니다. 미디어가 재생 가능한 페이지인지 확인하십시오.\n오류 정보: '
+    alertPermission: '오디오 캡처 권한을 가져오지 못했습니다. 미디어가 재생 가능한 페이지인지 확인하십시오.\n오류 정보: ',
+    labelAsrEngine: '음성 인식 엔진',
+    optAsrSensevoice: 'SenseVoice (고속 모드)',
+    optAsrWhisper: 'Whisper-Small (다국어/GPU)'
   }
 };
 
@@ -262,6 +278,12 @@ function applyLanguage(lang) {
   
   document.getElementById('label-ui-lang').textContent = getTranslation(lang, 'labelUiLang');
   document.getElementById('title-control-panel').textContent = getTranslation(lang, 'titleControlPanel');
+  
+  // ASR Engine translation
+  document.getElementById('label-asr-engine').textContent = getTranslation(lang, 'labelAsrEngine');
+  const asrOptions = document.getElementById('asr-engine').options;
+  asrOptions[0].textContent = getTranslation(lang, 'optAsrSensevoice');
+  asrOptions[1].textContent = getTranslation(lang, 'optAsrWhisper');
   
   document.getElementById('label-source-lang').textContent = getTranslation(lang, 'labelSourceLang');
   document.getElementById('opt-source-auto').textContent = getTranslation(lang, 'optSourceAuto');
@@ -303,10 +325,23 @@ function applyLanguage(lang) {
 chrome.storage.local.get([
   'ollamaUrl', 'modelName', 'deepseekKey', 'minSilence', 'maxSpeech',
   'uiLang', 'sourceLang', 'targetLang', 'showBilingual',
-  'bgColor', 'textColor', 'fontSize', 'historyLines'
+  'bgColor', 'textColor', 'fontSize', 'historyLines', 'asrEngine'
 ], (result) => {
-  if (result.ollamaUrl) ollamaUrlInput.value = result.ollamaUrl;
-  if (result.modelName) modelNameInput.value = result.modelName;
+  if (result.ollamaUrl) {
+    if (result.ollamaUrl === 'http://localhost:11434') {
+      ollamaUrlInput.value = 'http://127.0.0.1:11434';
+      chrome.storage.local.set({ ollamaUrl: 'http://127.0.0.1:11434' });
+    } else {
+      ollamaUrlInput.value = result.ollamaUrl;
+    }
+  } else {
+    ollamaUrlInput.value = 'http://127.0.0.1:11434';
+  }
+  if (result.modelName) {
+    modelNameInput.value = result.modelName;
+  } else {
+    modelNameInput.value = 'qwen2.5:7b-instruct';
+  }
   if (result.deepseekKey) deepseekKeyInput.value = result.deepseekKey;
   if (result.minSilence !== undefined) {
     minSilenceInput.value = result.minSilence;
@@ -330,6 +365,7 @@ chrome.storage.local.get([
   if (result.textColor) textColorInput.value = result.textColor;
   if (result.fontSize) fontSizeInput.value = result.fontSize;
   if (result.historyLines !== undefined) historyLinesInput.value = result.historyLines;
+  if (result.asrEngine) asrEngineInput.value = result.asrEngine;
 
   // Apply localization initially
   applyLanguage(uiLangInput.value);
@@ -351,7 +387,8 @@ const saveSettings = () => {
     bgColor: bgColorInput.value,
     textColor: textColorInput.value,
     fontSize: fontSizeInput.value,
-    historyLines: parseInt(historyLinesInput.value)
+    historyLines: parseInt(historyLinesInput.value),
+    asrEngine: asrEngineInput.value
   };
   chrome.storage.local.set(settings);
   
@@ -386,7 +423,7 @@ const saveSettings = () => {
 };
 
 ollamaUrlInput.addEventListener('input', saveSettings);
-modelNameInput.addEventListener('input', saveSettings);
+modelNameInput.addEventListener('change', saveSettings);
 deepseekKeyInput.addEventListener('input', saveSettings);
 
 uiLangInput.addEventListener('change', () => {
@@ -397,6 +434,7 @@ uiLangInput.addEventListener('change', () => {
 sourceLangInput.addEventListener('change', saveSettings);
 targetLangInput.addEventListener('change', saveSettings);
 showBilingualInput.addEventListener('change', saveSettings);
+asrEngineInput.addEventListener('change', saveSettings);
 
 bgColorInput.addEventListener('input', saveSettings);
 textColorInput.addEventListener('input', saveSettings);

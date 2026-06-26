@@ -165,7 +165,8 @@ function sendConfigToBackend() {
       min_silence: config.minSilence,
       max_speech: config.maxSpeech,
       source_lang: config.sourceLang,
-      target_lang: config.targetLang
+      target_lang: config.targetLang,
+      asr_engine: config.asrEngine
     }));
   }
 }

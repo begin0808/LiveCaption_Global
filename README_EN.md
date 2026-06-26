@@ -1,16 +1,17 @@
-# Studio0808 LiveCaption - Real-Time Web Video Speech Translation & Bilingual Subtitles
+# Studio0808 LiveCaption (Global Version) - Real-Time Web Video Speech Translation & Bilingual Subtitles
 
 [English](README_EN.md) | [繁體中文版](README.md)
 
-👉 **Live Documentation & Manual**: [https://begin0808.github.io/LiveCaption/](https://begin0808.github.io/LiveCaption/)
+👉 **Live Documentation & Manual**: [https://begin0808.github.io/LiveCaption_Global/](https://begin0808.github.io/LiveCaption_Global/)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Platform: Windows | macOS](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS-brightgreen.svg)](#)
-[![ASR: SenseVoice](https://img.shields.io/badge/ASR-SenseVoice--Small-orange.svg)](#)
+[![ASR: Whisper + SenseVoice](https://img.shields.io/badge/ASR-Whisper%20%2B%20SenseVoice-orange.svg)](#)
+[![Languages: 100+](https://img.shields.io/badge/Languages-100%2B-blueviolet.svg)](#)
 
-Studio0808 LiveCaption is a real-time speech recognition and bilingual subtitle translation system designed specifically for browser videos. Running entirely on your local machine, it offers 100% privacy protection and ultra-low latency.
+Studio0808 LiveCaption (Global Version) is a real-time speech recognition and bilingual subtitle translation system designed specifically for browser videos. The backend integrates the **Whisper multilingual engine** (supporting nearly 100 languages including French, German, Spanish, Italian, Russian, and Portuguese) and the **SenseVoice-Small fast engine** (Chinese, English, Japanese, Korean, Cantonese), paired with the local **Ollama** offline translation framework. Running entirely on your local machine, it offers 100% privacy protection and ultra-low latency.
 
-Ideal for online learning, accessibility/hearing-assist, foreign language listening training, global live streams, and video conference transcripts.
+Ideal for online learning, accessibility/hearing-assist, foreign language listening training, global live streams, and video conference transcripts. The web manual itself is available in 8 languages: Traditional Chinese, Simplified Chinese, English, Japanese, Korean, Spanish, French, and German.
 
 ---
 
@@ -44,7 +45,7 @@ If you do not want to configure the Python development environment, you can down
 ## ✨ Features
 
 *   **Ultra-Low Latency Tab Audio Capture**: Uses a unique Chrome Extension tab audio loopback mechanism to precisely capture audio tracks playing in the active tab without affecting other system audio or recording devices.
-*   **Offline Local AI Speech Recognition**: Powered by the Sherpa-ONNX architecture and Alibaba's open-source **SenseVoice-Small** speech model. Supports Chinese, English, Japanese, Korean, and Cantonese with extremely fast local decoding.
+*   **Dual-Engine Offline Local AI Speech Recognition**: Powered by the Sherpa-ONNX architecture, integrating both **SenseVoice-Small** (ultra-fast recognition for Chinese, English, Japanese, Korean, and Cantonese) and **Whisper** (high-precision recognition for nearly 100 global languages such as French, German, Spanish, Italian, and Russian). Switch engines anytime based on the video content for barrier-free global video reading.
 *   **Flexible Translation Engines**: Supports the local **Ollama** framework (Qwen 2.5 3B recommended) for fully offline translation, as well as the online **DeepSeek** Cloud API for near-human quality translation.
 *   **Premium Glassmorphism Subtitle Window**: An elegant semi-transparent floating window overlay supporting custom font sizes and colors, mouse click-through, drag-and-drop repositioning, and double-click to reset.
 *   **Multi-Line History Subtitle Scrolling**: Retains 0 to 2 lines of historical subtitles, fading and shrinking older lines upward to ensure you don't miss fast-paced speech.
