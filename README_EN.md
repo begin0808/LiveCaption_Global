@@ -77,7 +77,7 @@ LiveCaption/
 ### Step 1: Start the Backend Server
 If using the **Pre-Packaged Offline Bundle**:
 1. Download and extract `LiveCaption_Global_V20260626.zip`.
-2. Enter the directory and double-click to run **`點我啟動【即時字幕】後端服務.bat`**.
+2. Enter the directory and double-click to run **`START_LiveCaption_Global_Server.bat`**.
 3. Once the CMD window displays `INFO: Uvicorn running on http://127.0.0.1:8000`, the server is running. Keep this window open.
 
 If running from **Source Code** (Cross-platform Mac/Windows):

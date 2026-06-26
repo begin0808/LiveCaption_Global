@@ -22,8 +22,7 @@ def main():
     # 2. 確保虛擬環境的 pip 與 pyinstaller 存在
     exe_ext = ".exe" if sys.platform == "win32" else ""
     python_path = os.path.join(BASE_DIR, ".venv", "Scripts", f"python{exe_ext}")
-    pyinstaller_path = os.path.join(BASE_DIR, ".venv", "Scripts", f"pyinstaller{exe_ext}")
-    
+
     if not os.path.exists(python_path):
         print(f"未找到虛擬環境的 Python (路徑: {python_path})，請確認您已在 backend 目錄建立 .venv")
         sys.exit(1)
@@ -34,8 +33,10 @@ def main():
     # 3. 執行 PyInstaller 打包 (onedir 模式，利於載入外部大型模型)
     # --collect-data opencc 用於確保簡繁轉換字典能被正確包入 exe
     print("正在使用 PyInstaller 編譯 Python 程式為 Windows 執行檔...")
+    # 以「python -m PyInstaller」呼叫，確保使用本資料夾 .venv 的環境
+    # (避免 pyinstaller.exe 捷徑因 venv 複製而指向其他資料夾的舊環境)
     pyinstaller_cmd = [
-        pyinstaller_path,
+        python_path, "-m", "PyInstaller",
         "--name", "LiveCaptionServer",
         "--onedir",
         "--clean",
@@ -142,17 +143,17 @@ def main():
         
     # 5. 建立便利的「啟動服務.bat」批次檔
     print("\n正在建立一鍵啟動批次檔...")
-    bat_path = os.path.join(DIST_DIR, "點我啟動【即時字幕】後端服務.bat")
+    bat_path = os.path.join(DIST_DIR, "START_LiveCaption_Global_Server.bat")
     bat_content = """@echo off
 chcp 65001 > nul
 title Studio0808 LiveCaption Server
 echo ===================================================
-echo   正在啟動 Studio0808 LiveCaption 語音翻譯後端伺服器...
+echo   Starting Studio0808 LiveCaption backend server...
 echo ===================================================
 echo.
 LiveCaptionServer.exe
 echo.
-echo 伺服器已結束運行。
+echo Server has stopped. Press any key to close.
 pause
 """
     with open(bat_path, "w", encoding="utf-8") as f:

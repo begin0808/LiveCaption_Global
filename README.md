@@ -77,7 +77,7 @@ LiveCaption/
 ### 步驟 1：啟動後端伺服器 (Backend Server)
 如果您使用的是**離線整合發布包**：
 1. 下載並解壓縮 `LiveCaption_Global_V20260626.zip`。
-2. 進入目錄並雙擊執行 **`點我啟動【即時字幕】後端服務.bat`**。
+2. 進入目錄並雙擊執行 **`START_LiveCaption_Global_Server.bat`**。
 3. 當 CMD 視窗顯示 `INFO: Uvicorn running on http://127.0.0.1:8000` 即代表啟動成功，請保持該視窗開啟。
 
 如果您使用的是**原始碼運行**（跨平台 Mac/Windows）：

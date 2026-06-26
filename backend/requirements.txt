@@ -1,7 +1,23 @@
+# ===== 基本依賴 (純 CPU 即可安裝) =====
 fastapi==0.110.0
 uvicorn==0.28.0
 websockets==12.0
-sherpa-onnx>=1.10.45
 numpy>=1.20.0,<2.0.0
 httpx==0.27.0
 opencc-python-reimplemented>=0.1.7
+
+# ===== 語音辨識引擎 sherpa-onnx =====
+# 預設 (CPU、跨平台、即裝即用)：
+sherpa-onnx>=1.10.45
+#
+# 注意：本 Windows 發布包採用 GPU (CUDA) 版以加速 Whisper 即時辨識。
+# 實測使用版本為： sherpa-onnx==1.13.3+cuda12.cudnn9
+# GPU wheel 需從 sherpa-onnx (k2-fsa) 的 CUDA 套件來源安裝 (非預設 PyPI)，
+# 來源頁面： https://k2-fsa.github.io/sherpa/onnx/cuda.html
+# 安裝 GPU 版時會一併帶入下列 NVIDIA CUDA runtime 套件
+# (build_release.py 會自動把它們的 DLL 打包進發布包)：
+#   nvidia-cublas-cu12, nvidia-cuda-nvrtc-cu12, nvidia-cuda-runtime-cu12,
+#   nvidia-cudnn-cu12, nvidia-cufft-cu11, nvidia-cufft-cu12, nvidia-nvjitlink-cu12
+
+# ===== 打包工具 (僅製作 .exe 發布包時需要；build_release.py 會自動安裝) =====
+# pyinstaller
