@@ -37,7 +37,7 @@ This system uses **real-time sentence-level streaming detection & translation te
 
 If you do not want to configure the Python development environment, you can download the pre-compiled, one-click execution offline bundle:
 
-*   **[Download One-Click Offline Bundle (Google Drive)](https://drive.google.com/file/d/1mepxzOthPV2NeWjwenk8yNsSSB0vaJGF/view?usp=sharing)**
+*   **[Download One-Click Offline Bundle (Google Drive)](https://drive.google.com/file/d/1FMWvPvIfw3KsGquizbHZj24yVxkOPg7a/view?usp=sharing)**
 *   **Version File**: `LiveCaption_Global_V20260626.zip` (Includes all necessary AI speech models and batch startup files)
 
 ---
