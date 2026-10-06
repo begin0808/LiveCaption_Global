@@ -124,6 +124,22 @@ LiveCaption/
    ```
 3. 編譯成品將會自動輸出至 `backend/dist/LiveCaptionServer/` 資料夾，該目錄已排除任何暫存快取，可直接壓縮發布。
 
+### 執行測試
+
+修改翻譯流程或字幕邏輯後，建議先跑純邏輯單元測試（**不需要下載模型、不需要 Ollama、不佔用 GPU**，約 2 秒完成）：
+
+```powershell
+backend\.venv\Scripts\python.exe backend\test_translation_logic.py
+```
+
+涵蓋 `plan_translation` 的語言判定與三路分流（原文 / 本地 OpenCC / 送翻譯引擎）、system prompt 組裝、簡繁轉換的冪等性。全部通過時會顯示 `=== [ALL PASSED] ===` 並以退出碼 0 結束，可直接接進 CI。
+
+需要驗證端到端延遲與滾動重識別效果時，改用（需先備妥模型、Ollama 與測試音訊）：
+
+```powershell
+backend\.venv\Scripts\python.exe backend\test_rolling_e2e.py
+```
+
 ---
 
 ## 💬 常見問題與障礙排除 (FAQ)

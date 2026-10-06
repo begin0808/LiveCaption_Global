@@ -124,6 +124,22 @@ To modify the Python backend and package it into a `.exe` executable for Windows
    ```
 3. The packaged folder will be exported to `backend/dist/LiveCaptionServer/`. It is clean of caches and ready to be zipped.
 
+### Running the Tests
+
+After touching the translation flow or the caption logic, run the pure-logic unit tests first (**no model download, no Ollama, no GPU required**; finishes in about 2 seconds):
+
+```powershell
+backend\.venv\Scripts\python.exe backend\test_translation_logic.py
+```
+
+It covers the language routing inside `plan_translation` (pass-through / local OpenCC / external engine), system-prompt assembly, and the idempotency of the script conversion. On success it prints `=== [ALL PASSED] ===` and exits with code 0, so it can be dropped straight into CI.
+
+To measure end-to-end latency and the effect of rolling re-recognition, use this instead (requires models, Ollama and a test clip — the clip ships inside the model bundle):
+
+```powershell
+backend\.venv\Scripts\python.exe backend\test_rolling_e2e.py
+```
+
 ---
 
 ## 💬 FAQ & Troubleshooting
