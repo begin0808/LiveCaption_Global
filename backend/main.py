@@ -6,6 +6,39 @@ import time
 import asyncio
 from pathlib import Path
 
+
+# ── 讓本機回環請求繞過系統代理 ────────────────────────────────────────
+# 為什麼非做不可（實測過，不是理論）：
+#   httpx 預設 trust_env=True，會從 Windows 登錄檔讀 IE/WinINET 代理設定。
+#   urllib 會拿 ProxyOverride 裡的 127.* 判斷 bypass，**但 httpx 不這樣做** ——
+#   它只認 getproxies()["no"] 這個鍵，而登錄檔那條路徑不會給出 "no"，
+#   於是 httpx 對「所有 http:// 請求」都掛上代理，本機回環也不例外。
+#
+# 後果（三個都是「本機回環走代理」才會有的）：
+#   1. 每次呼叫 Ollama 都多一趟「連代理 → 代理再連回本機」的往返。字幕管線
+#      每秒要打數次，開「滾動字幕」後更頻繁，這個來回純屬白費。
+#   2. 代理沒開或掛掉時，本機 Ollama 也跟著連不上 —— 服務明明就在本機，
+#      卻因為繞了代理而失效。
+#   3. Ollama 永遠在本機，本來就沒有任何理由走代理。
+#
+# 註：這不是「避免把代理打爆」的防禦措施。曾懷疑本機回環的高頻短連接會打掛
+#   Clash 內核，後續以 8 份內核日誌交叉比對後已推翻該推論（命中 0 次照樣崩、
+#   命中 200 次反而活了 8 分鐘；崩潰棧最內層是 HTTPS 的 crypto/tls，而 Ollama
+#   走的是明文 HTTP）。真正的根因是舊內核以 go1.18beta1 建置。
+def _ensure_loopback_no_proxy():
+    cur = os.environ.get("NO_PROXY") or os.environ.get("no_proxy") or ""
+    parts = [p.strip() for p in cur.split(",") if p.strip()]
+    for host in ("127.0.0.1", "localhost", "::1"):
+        if host not in parts:
+            parts.append(host)
+    merged = ",".join(parts)
+    os.environ["NO_PROXY"] = merged
+    os.environ["no_proxy"] = merged
+
+
+_ensure_loopback_no_proxy()
+
+
 # Add NVIDIA pip packages' DLL paths to Windows DLL search directory
 def add_nvidia_dll_paths():
     dll_dirs = []
@@ -101,7 +134,8 @@ def init_vad():
         silero_vad=sherpa_onnx.SileroVadModelConfig(
             model=VAD_MODEL_PATH,
             threshold=0.4,
-            min_silence_duration=0.5,  # 0.5 秒靜音判定為說話結束
+            min_silence_duration=0.35,  # 實測 0.35s 最平衡：空檔比 0.5s 少 250ms，
+                                        # 且 0.30s 以內的自然停頓仍不會被切分
             min_speech_duration=0.15,
             max_speech_duration=10.0,  # 最長單句 10 秒強迫切分
         ),
@@ -293,6 +327,69 @@ LANG_MAP = {
     "ru": "俄文 (Russian)",
 }
 
+def build_system_prompt(target_lang: str, model_name: str) -> str:
+    """依目標語言組出 system prompt（串流與非串流共用，確保兩種路徑行為一致）。
+
+    ⚠️ system prompt 本身的用字會「傳染」給模型：簡體目標若用繁體撰寫 prompt，
+       小模型（qwen2.5:3b 等）會大量漏出繁體字（實測 5/11 句），並偶爾漏譯。
+       因此簡體目標必須用簡體 prompt，繁體目標用繁體 prompt，其餘語言用繁體版。
+    """
+    target_name = LANG_MAP.get(target_lang, "繁體中文")
+    if target_lang == "zh-TW":
+        return (
+            "你是一個專業的影片字幕即時翻譯官。請將使用者輸入的影片語音字幕，翻譯成簡短流暢的繁體中文。"
+            "輸出必須是「繁體中文（台灣用語）」，絕對禁止輸出任何簡體字。"
+            "只輸出翻譯後的譯文本身，並輸出為「單獨一行純文字」；"
+            "嚴禁輸出原文、注音、拼音、解釋、引言、括號標註、清單符號、換行或任何額外標記。"
+        )
+    if target_lang in ("zh-CN", "zh", "zh-Hans"):
+        return (
+            "你是一个专业的影片字幕即时翻译官。请把用户输入的影片语音字幕，翻译成简短流畅的简体中文。"
+            "输出必须全部使用简体中文汉字，禁止使用繁体字。"
+            "只输出翻译后的译文本身，并输出为「单独一行纯文字」；"
+            "严禁输出原文、注音、拼音、解释、引言、括号标注、清单符号、换行或任何额外标记。"
+        )
+    return (
+        f"你是一個專業的影片字幕即時翻譯官。請將使用者輸入的影片語音字幕，翻譯成簡短流暢的{target_name}。"
+        f"輸出必須是{target_name}。"
+        "只輸出翻譯後的譯文本身，並輸出為「單獨一行純文字」；"
+        "嚴禁輸出原文、注音、拼音、解釋、引言、括號標註、清單符號、換行或任何額外標記。"
+    )
+
+
+def add_no_think(system_prompt: str, model_name: str) -> str:
+    """Qwen3 系列預設會先吐一長串思考鏈（thinking），字幕即時場景必須關閉，
+    否則延遲暴增數倍。/no_think 由 Qwen3 官方 chat template 識別。"""
+    if model_name and model_name.lower().startswith("qwen3"):
+        return system_prompt + " /no_think"
+    return system_prompt
+
+
+def convert_script(text: str, target_lang: str) -> str:
+    """繁體/簡體目標各過一道 OpenCC，消除殘留異體字（天气→天氣、酋長→酋长）。
+    OpenCC 為逐字映射且冪等，因此串流時對「累積文本」反覆轉換也安全。"""
+    if not text:
+        return text
+    if target_lang == "zh-TW":
+        return cc_s2t.convert(text)
+    if target_lang in ("zh-CN", "zh", "zh-Hans"):
+        return cc_t2s.convert(text)
+    return text
+
+
+def flatten_text(text: str) -> str:
+    """壓平殘留的換行與多餘空白，消除「分行/分段」型亂碼。"""
+    return " ".join(text.split())
+
+
+def deepseek_system_prompt(target_lang: str) -> str:
+    target_name = LANG_MAP.get(target_lang, "繁體中文")
+    return (
+        f"你是一個專業的影片字幕即時翻譯官。請將輸入的影片語音字幕，翻譯成簡短流暢的{target_name}。"
+        "請只輸出翻譯後的文字，不要包含任何解釋、引言或額外標記，保持字數與原句差不多。"
+    )
+
+
 async def translate_text(text: str, target_lang: str, ollama_url: str, model_name: str, deepseek_key: str = None) -> str:
     global ollama_online
     """
@@ -304,7 +401,10 @@ async def translate_text(text: str, target_lang: str, ollama_url: str, model_nam
     if deepseek_key and len(deepseek_key.strip()) > 10:
         try:
             _t0 = time.perf_counter()
-            async with httpx.AsyncClient(timeout=3.0) as client:
+            # 逾時由 3s 放寬至 8s：實測單句約 0.45~0.9s，但雲端 API 偶有抖動。
+            # 逾時後會落到 Ollama(通常未啟動) 與 Google(部分網路不可達) 兩道無效備援，
+            # 最終輸出「[未翻譯]」比多等 1~2 秒更糟，故給予合理餘裕。
+            async with httpx.AsyncClient(timeout=8.0) as client:
                 response = await client.post(
                     "https://api.deepseek.com/v1/chat/completions",
                     headers={
@@ -314,7 +414,7 @@ async def translate_text(text: str, target_lang: str, ollama_url: str, model_nam
                     json={
                         "model": "deepseek-chat",
                         "messages": [
-                            {"role": "system", "content": f"你是一個專業的影片字幕即時翻譯官。請將輸入的影片語音字幕，翻譯成簡短流暢的{target_name}。請只輸出翻譯後的文字，不要包含任何解釋、引言或額外標記，保持字數與原句差不多。"},
+                            {"role": "system", "content": deepseek_system_prompt(target_lang)},
                             {"role": "user", "content": text}
                         ],
                         "temperature": 0.3
@@ -331,19 +431,11 @@ async def translate_text(text: str, target_lang: str, ollama_url: str, model_nam
     # 2. 本機離線 Ollama 翻譯
     if ollama_url and ollama_online:
         try:
-            # 針對目標語言強化指令；繁體中文額外強制不可輸出簡體字
-            if target_lang == "zh-TW":
-                lang_rule = "輸出必須是「繁體中文（台灣用語）」，絕對禁止輸出任何簡體字。"
-            else:
-                lang_rule = f"輸出必須是{target_name}。"
-            system_prompt = (
-                f"你是一個專業的影片字幕即時翻譯官。請將使用者輸入的影片語音字幕，翻譯成簡短流暢的{target_name}。"
-                f"{lang_rule}"
-                "只輸出翻譯後的譯文本身，並輸出為「單獨一行純文字」；"
-                "嚴禁輸出原文、注音、拼音、解釋、引言、括號標註、清單符號、換行或任何額外標記。"
-            )
+            # 依目標語言組 system prompt，並對 Qwen3 關閉思考鏈（細節見 build_system_prompt）
+            system_prompt = add_no_think(build_system_prompt(target_lang, model_name), model_name)
             _t0 = time.perf_counter()
-            async with httpx.AsyncClient(timeout=15.0) as client:
+            # trust_env=False：Ollama 永遠在本機，絕不該繞系統代理（詳見檔頭 _ensure_loopback_no_proxy）
+            async with httpx.AsyncClient(timeout=15.0, trust_env=False) as client:
                 # 改用 system + 乾淨 prompt（套用模型 chat 模板），比補全式 prompt 更穩定，避免亂碼輸出
                 response = await client.post(
                     f"{ollama_url}/api/generate",
@@ -360,12 +452,9 @@ async def translate_text(text: str, target_lang: str, ollama_url: str, model_nam
                 )
                 if response.status_code == 200:
                     res_json = response.json()
-                    translated = res_json.get("response", "").strip()
-                    # 壓平殘留的換行與多餘空白，消除「分行/分段」型亂碼
-                    translated = " ".join(translated.split())
-                    # 繁體中文目標：再過一道 OpenCC s2t，徹底消除簡體殘留 (天气→天氣、钱→錢)
-                    if target_lang == "zh-TW" and translated:
-                        translated = cc_s2t.convert(translated)
+                    # 先壓平殘留換行與多餘空白，再過一道 OpenCC 修正字形殘留：
+                    #   繁體目標 s2t (天气→天氣)、簡體目標 t2s (酋長→酋长)。兩者皆冪等。
+                    translated = convert_script(flatten_text(res_json.get("response", "")), target_lang)
                     if translated:
                         print(f"  ➔ [Ollama 翻譯 ({model_name})] (耗時 {(time.perf_counter()-_t0)*1000:.0f} ms)")
                         return translated
@@ -405,9 +494,191 @@ async def translate_text(text: str, target_lang: str, ollama_url: str, model_nam
     print(f"  ➔ [所有翻譯引擎皆失敗，保留原文]")
     return f"[未翻譯] {text}"
 
+
+async def translate_text_stream(text: str, target_lang: str, ollama_url: str, model_name: str, deepseek_key: str = None):
+    """串流版翻譯：逐塊 yield「截至目前為止的累積譯文」（不是增量片段）。
+
+    為什麼 yield 累積文本而不是 delta？
+      字幕前端只做「整行替換」，累積文本讓前端不必自己拼接，
+      且天然免疫封包亂序/丟失造成的文字錯位。
+
+    契約：只有在真的吐出過至少一個 chunk 時才算成功。
+      若不支援串流或連線失敗而「一個 chunk 都沒吐」，呼叫方會退回非串流的
+      translate_text()，確保字幕永遠不會空白。
+    """
+    global ollama_online
+
+    # 1. 雲端 DeepSeek API（OpenAI 相容 SSE：每行 "data: {json}"，以 "data: [DONE]" 收尾）
+    if deepseek_key and len(deepseek_key.strip()) > 10:
+        try:
+            _t0 = time.perf_counter()
+            acc = ""
+            async with httpx.AsyncClient(timeout=8.0) as client:
+                async with client.stream(
+                    "POST",
+                    "https://api.deepseek.com/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {deepseek_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "model": "deepseek-chat",
+                        "messages": [
+                            {"role": "system", "content": deepseek_system_prompt(target_lang)},
+                            {"role": "user", "content": text}
+                        ],
+                        "temperature": 0.3,
+                        "stream": True
+                    }
+                ) as response:
+                    if response.status_code == 200:
+                        async for line in response.aiter_lines():
+                            if not line.startswith("data:"):
+                                continue
+                            payload = line[5:].strip()
+                            if payload == "[DONE]":
+                                break
+                            try:
+                                delta = json.loads(payload)["choices"][0]["delta"].get("content") or ""
+                            except Exception:
+                                continue  # 心跳/空行/格式異常 → 跳過該塊
+                            if not delta:
+                                continue
+                            acc += delta
+                            yield flatten_text(acc)
+                        if acc.strip():
+                            print(f"  ➔ [DeepSeek 串流翻譯] (耗時 {(time.perf_counter()-_t0)*1000:.0f} ms)")
+                            return
+        except Exception as e:
+            print(f"DeepSeek 串流翻譯失敗 ({type(e).__name__}): {e}")
+
+    # 2. 本機 Ollama（NDJSON：每行一個完整 JSON，直到 done=true）
+    if ollama_url and ollama_online:
+        try:
+            system_prompt = add_no_think(build_system_prompt(target_lang, model_name), model_name)
+            _t0 = time.perf_counter()
+            acc = ""
+            # trust_env=False：Ollama 永遠在本機，不該繞系統代理（詳見檔頭 _ensure_loopback_no_proxy）
+            async with httpx.AsyncClient(timeout=15.0, trust_env=False) as client:
+                async with client.stream(
+                    "POST",
+                    f"{ollama_url}/api/generate",
+                    json={
+                        "model": model_name,
+                        "system": system_prompt,
+                        "prompt": text,
+                        "stream": True,
+                        "options": {
+                            "temperature": 0.2,
+                            "num_predict": 80
+                        }
+                    }
+                ) as response:
+                    if response.status_code == 200:
+                        async for line in response.aiter_lines():
+                            line = line.strip()
+                            if not line:
+                                continue
+                            try:
+                                chunk = json.loads(line).get("response", "")
+                            except Exception:
+                                continue
+                            if not chunk:
+                                continue
+                            acc += chunk
+                            # 每塊都重新壓平 + 轉字形（兩者皆冪等，對累積文本安全）
+                            yield convert_script(flatten_text(acc), target_lang)
+                        if acc.strip():
+                            print(f"  ➔ [Ollama 串流翻譯 ({model_name})] (耗時 {(time.perf_counter()-_t0)*1000:.0f} ms)")
+                            return
+        except Exception as e:
+            # 區分兩種失敗：服務沒開 vs 模型載入中(冷啟動)
+            if isinstance(e, (httpx.ConnectError, httpx.ConnectTimeout)):
+                print(f"本機 Ollama 連線失敗 ({type(e).__name__})，服務可能未啟動，本工作階段後續將跳過 Ollama。")
+                ollama_online = False
+            else:
+                print(f"本機 Ollama 串流翻譯失敗 ({type(e).__name__})，本句將退回非串流路徑。")
+
+    # 3. Google 免費通道不支援串流 → 這裡直接放棄，由呼叫方退回 translate_text() 處理
+
+
+# ─────────────────────────────────────────────────────────────────────
+# 滾動重識別（方案 C）
+# ─────────────────────────────────────────────────────────────────────
+# 背景：這個管線原本是「等 VAD 定段 → 才 ASR → 才翻譯」，說話人不停頓就一個
+# 字都不出。實測逐字稿裡典型一段 5~9 秒、最長 20 秒 —— 首字延遲有 96% 花在
+# 「等停頓」，ASR 與翻譯合計只佔 4%。
+#
+# 業界做法一致：Zoom / Google Meet / 騰訊會議 都是「邊說邊出臨時結果，定段
+# 後原地覆蓋成定稿」。學界同樣有明確對應 —— Whisper-Streaming 的
+# LocalAgreement-2、IWSLT 2022 同傳任務、EMNLP 2023 demo 的 "revision mode"
+#（論文原文：「the last hypothesis except the common prefix is sent as
+# unstable output」，且不穩定文本同樣送進翻譯模型）。
+# Google Cloud STT 的 API 直接把這件事寫成欄位：isFinal=false 的 interim
+# result「may change」，另附 stability 0.0~1.0。
+# Zoom 的官方使用說明也直白：「if you pause slightly at the end of a sentence
+# the captions will often go back and correct a word based on context」。
+#
+# 因此使用者看到的「文字邊打邊改」不是瑕疵，而是這類系統的正常型態。
+#
+# 實作要點：沿用 sherpa-onnx VAD 的 current_segment（說話中的即時音訊），
+# 每 ROLL_INTERVAL 秒對「整段累積音訊」重跑一次 ASR。因為每次都是從頭重跑，
+# 不穩定的只有尾端 —— 實測臨時文本與定稿的公共前綴單調增長（9%→40%→94%），
+# 11 輪中 0 次回縮，所以不會出現「字消失」的閃爍。
+ROLL_INTERVAL = 0.5      # 臨時 ASR 節奏（秒）
+ROLL_MIN_AUDIO = 0.6     # 短於這個秒數不值得跑
+ROLL_MAX_AUDIO = 15.0    # 長於這個秒數就跳過該輪（單次解碼會拖太久）
+
+
+def plan_translation(raw_text, lang_tag, target_lang, source_lang, engine):
+    """決定一句話該怎麼產出顯示文本 → (kind, payload, recognized_lang)。
+
+    kind = 'raw'   直接沿用原文（沒開翻譯，或識別語言已等於目標語言）
+           'local' 本地 OpenCC 簡繁轉換（中文對中文，零成本）
+           'mt'    需送翻譯引擎
+
+    定稿流程與滾動臨時字幕共用這一份判斷，避免兩處條件漂移
+    （例如只有定稿會處理 zh→zh-TW，臨時字幕卻漏掉）。
+
+    lang_tag 要傳 SenseVoice 的 result.lang（例如 '<|zh|>'）。
+    ⚠ 這裡曾有一個長期潛伏的 bug：舊寫法是在 result.text 裡搜尋 '<|zh|>'，
+      但 sherpa-onnx 根本不會把語言標籤寫進 text，於是 recognized_lang 永遠
+      是 'auto'，中文→中文那段本地 OpenCC 分支是**死碼**，
+      所有中文語音都被多送一次 LLM「翻譯」，不但白費 GPU，還會把內容改壞
+      （實測：「开饭时间」被翻成「开放时间」，語意直接跑掉）。
+    """
+    recognized = "auto"
+    if engine == "whisper":
+        if source_lang != "auto":
+            recognized = source_lang
+    else:
+        t = (lang_tag or "").strip().lower()
+        # 粵語獨立成一類：它的書面語就是粵語，不能拿去跟繁體/簡體中文做
+        # OpenCC 互轉（那只轉字形、不轉詞彙），必須交給翻譯模型。
+        # 面板沒有粵語目標選項，因此這樣分類不會改變既有行為。
+        if "<|yue|>" in t or t in ("yue", "cantonese"):
+            recognized = "yue"
+        elif "<|zh|>" in t or t in ("zh", "chinese", "mandarin"):
+            recognized = "zh"
+        elif "<|en|>" in t or t in ("en", "english"):
+            recognized = "en"
+        elif "<|ja|>" in t or t in ("ja", "japanese"):
+            recognized = "ja"
+        elif "<|ko|>" in t or t in ("ko", "korean"):
+            recognized = "ko"
+
+    if target_lang == "none":
+        return "raw", raw_text, recognized
+    if target_lang == recognized:
+        return "raw", raw_text, recognized
+    if recognized == "zh" and target_lang in ("zh-TW", "zh-CN"):
+        return "local", convert_script(raw_text, target_lang), recognized
+    return "mt", raw_text, recognized
+
+
 @app.websocket("/stream")
 async def websocket_endpoint(websocket: WebSocket):
-    global active_connections, asr_recognizer, vad_detector
+    global active_connections, asr_recognizer, vad_detector, last_active_time
     await websocket.accept()
     active_connections += 1
     print(f"WebSocket 客戶端已連線。當前連線數: {active_connections}")
@@ -438,7 +709,7 @@ async def websocket_endpoint(websocket: WebSocket):
         silero_vad=sherpa_onnx.SileroVadModelConfig(
             model=VAD_MODEL_PATH,
             threshold=0.4,
-            min_silence_duration=0.5,
+            min_silence_duration=0.35,
             min_speech_duration=0.15,
             max_speech_duration=10.0,
         ),
@@ -448,11 +719,135 @@ async def websocket_endpoint(websocket: WebSocket):
     
     # 設定選項 (預設為 Ollama 本地)
     ollama_url = "http://127.0.0.1:11434"
-    model_name = "qwen2.5:7b-instruct"
+    model_name = "qwen3:4b-instruct"
     deepseek_key = None
     source_lang = "auto"
     target_lang = "none"
     asr_engine = "sensevoice"
+    # 串流翻譯：開啟後譯文逐字回推，首字約 100~300ms 就出現在畫面上
+    stream_translate = False
+    # 滾動重識別：說話中就持續出臨時字幕，不等 VAD 定段
+    rolling_asr = True
+
+    # ── 滾動重識別的連線內狀態 ──
+    # 放在 dict 裡是為了讓巢狀協程能直接改，不必用 nonlocal 到處宣告
+    rs = {"task": None, "stop": True, "raw": "", "zh": "", "start": None}
+    # sherpa-onnx 的解碼是同步 C++ 呼叫，丟到執行緒池才不會把「收音訊」一起卡住；
+    # 但同一時間只能有一個解碼在跑（多個 stream 共用同一份模型權重）。
+    asr_lock = asyncio.Lock()
+
+    async def asr_decode_async(samples):
+        """在執行緒池裡跑一次 ASR，回傳 (文字, 語言標籤)。
+
+        語言標籤取自 result.lang（SenseVoice 會給 '<|zh|>' 這種值）。
+        不要試圖從 result.text 裡找標籤 —— 那裡不會有。
+        """
+        def _run():
+            st = asr_recognizer.create_stream()
+            st.accept_waveform(16000, samples)
+            asr_recognizer.decode_stream(st)
+            return st.result.text, (getattr(st.result, "lang", "") or "")
+
+        async with asr_lock:
+            if asr_recognizer is None:
+                return "", ""
+            return await asyncio.get_running_loop().run_in_executor(None, _run)
+
+    async def settle_rolling():
+        """定段時先收掉滾動迴圈。
+
+        必須「等它結束」而不是直接 cancel：解碼跑在執行緒池裡，cancel 不會
+        真的中止那個 C++ 呼叫，定稿若緊接著解碼就有並發存取的風險。等待上限
+        取 2s，正常情況下迴圈會在一個回合內（≤400ms）自己看到 stop 退出。
+        """
+        rs["stop"] = True
+        task = rs["task"]
+        rs["task"] = None
+        if task is None or task.done():
+            return
+        try:
+            await asyncio.wait_for(task, timeout=2.0)
+        except (asyncio.TimeoutError, asyncio.CancelledError):
+            task.cancel()
+        except Exception:
+            pass
+
+    async def rolling_loop():
+        """方案 C 主迴圈：說話中每 ROLL_INTERVAL 秒出一版臨時字幕。"""
+        rs["stop"] = False
+        rs["raw"] = ""
+        rs["zh"] = ""
+        rs["start"] = None
+        try:
+            while not rs["stop"]:
+                await asyncio.sleep(ROLL_INTERVAL)
+                if rs["stop"]:
+                    break
+
+                seg = local_vad.current_segment
+                if seg is None:
+                    continue
+                samples = seg.samples
+                n_sec = len(samples) / 16000.0
+                if n_sec < ROLL_MIN_AUDIO or n_sec > ROLL_MAX_AUDIO:
+                    continue
+
+                raw_full, lang_tag = await asr_decode_async(samples)
+                if rs["stop"]:
+                    break
+                if current_asr_engine == "whisper":
+                    raw = raw_full.strip()
+                else:
+                    raw = clean_sense_voice_text(raw_full)
+                # 文本沒變就不用重送、更不用重翻
+                if not raw or raw == rs["raw"]:
+                    continue
+                rs["raw"] = raw
+                start_time = seg.start / 16000.0
+                rs["start"] = start_time
+
+                kind, payload, _ = plan_translation(
+                    raw, lang_tag, target_lang, source_lang, current_asr_engine
+                )
+
+                # 原文先上屏：這一步不花任何模型成本。
+                # 但需要翻譯時，若直接把「上一輪的譯文」墊在後面，會出現原文已更新、
+                # 譯文還停在上一句的錯位（實測：原文「开放时间早上9点」配譯文
+                # 「待放时间」），雙語模式下很難讀。所以只有這一行還沒出現過任何
+                # 文字時才先送原文，之後一律等譯文一起送，確保同行原文與譯文對得上。
+                if kind != "mt" or not rs["zh"]:
+                    await websocket.send_json({
+                        "event": "subtitle_partial",
+                        "text_raw": raw,
+                        "text_zh": rs["zh"] if kind == "mt" else payload,
+                        "start": start_time,
+                        "duration": n_sec,
+                    })
+
+                if kind != "mt":
+                    rs["zh"] = payload
+                    continue
+
+                # 臨時譯文：臨時結果反正會被定稿覆蓋，不做串流。
+                # 不需要額外的節流 —— 迴圈每次都會先 sleep(ROLL_INTERVAL)，
+                # 節奏天然就由 ASR + MT 的耗時決定（實測約每秒一版）。
+                zh = await translate_text(raw, target_lang, ollama_url, model_name, deepseek_key)
+                if rs["stop"]:
+                    break
+                if not zh:
+                    continue
+                rs["zh"] = zh
+                await websocket.send_json({
+                    "event": "subtitle_partial",
+                    "text_raw": raw,
+                    "text_zh": zh,
+                    "start": start_time,
+                    "duration": n_sec,
+                })
+        except asyncio.CancelledError:
+            raise
+        except Exception as e:
+            print(f"滾動重識別迴圈中止 ({type(e).__name__}): {e}")
 
     try:
         while True:
@@ -470,8 +865,15 @@ async def websocket_endpoint(websocket: WebSocket):
                         source_lang = config_data.get("source_lang", source_lang)
                         target_lang = config_data.get("target_lang", target_lang)
                         asr_engine = config_data.get("asr_engine", asr_engine)
+                        stream_translate = bool(config_data.get("stream_translate", stream_translate))
+                        rolling_asr = bool(config_data.get("rolling_asr", rolling_asr))
                         global ollama_online
                         ollama_online = True
+
+                        # 面板上把滾動關掉時，正在跑的那一輪要收手，否則會繼續往
+                        # 同一行寫臨時字幕。
+                        if not rolling_asr:
+                            await settle_rolling()
                         
                         # 動態加載或切換 ASR 引擎
                         if asr_engine == "whisper":
@@ -480,7 +882,7 @@ async def websocket_endpoint(websocket: WebSocket):
                             init_sensevoice()
                             
                         # 動態重新設定 VAD 參數以降低延遲
-                        min_silence = config_data.get("min_silence", 0.5)
+                        min_silence = config_data.get("min_silence", 0.35)
                         max_speech = config_data.get("max_speech", 10.0)
                         
                         vad_config = sherpa_onnx.VadModelConfig(
@@ -494,7 +896,7 @@ async def websocket_endpoint(websocket: WebSocket):
                             sample_rate=16000,
                         )
                         local_vad = sherpa_onnx.VoiceActivityDetector(vad_config, buffer_size_in_seconds=30)
-                        print(f"已更新後端設定: ASR={asr_engine}, Ollama={ollama_url}, Model={model_name}, SourceLang={source_lang}, TargetLang={target_lang}")
+                        print(f"已更新後端設定: ASR={asr_engine}, Ollama={ollama_url}, Model={model_name}, SourceLang={source_lang}, TargetLang={target_lang}, 串流翻譯={'開' if stream_translate else '關'}, 滾動重識別={'開' if rolling_asr else '關'}")
                         print(f"已動態更新 VAD 設定: min_silence={min_silence}s, max_speech={max_speech}s")
                 except Exception as e:
                     print(f"解析設定訊息或更新 VAD 失敗: {e}")
@@ -512,12 +914,30 @@ async def websocket_endpoint(websocket: WebSocket):
                 
                 # 餵給 VAD
                 local_vad.accept_waveform(pcm_data)
-                
+
+                # ── 滾動重識別：講話中就開始出臨時字幕，不等 VAD 定段 ──
+                # is_speech_detected() 在說話中為真、VAD 定段後轉為假，
+                # 正好可以拿來啟動／收掉臨時字幕迴圈。
+                if rolling_asr:
+                    if local_vad.is_speech_detected():
+                        if rs["task"] is None or rs["task"].done():
+                            rs["task"] = asyncio.create_task(rolling_loop())
+                    else:
+                        rs["stop"] = True
+
                 # 檢查是否有切分好的語音段落
                 while not local_vad.empty():
+                    # 定段了：先讓滾動迴圈收手，避免臨時字幕和定稿搶著寫同一行
+                    await settle_rolling()
+
                     speech_segment = local_vad.front
                     samples = speech_segment.samples
-                    start_time = speech_segment.start
+                    # 注意：sherpa-onnx 的 speech_segment.start 單位是「取樣點 (samples)」不是秒。
+                    # 16kHz 下必須除以 16000 才是秒數，否則日誌會出現 [316064.00s] 這種離譜數值，
+                    # 且寫入逐字稿的相對時間也會算錯。
+                    # 另外 current_segment.start 與 front.start 實測完全相同，
+                    # 所以臨時字幕和定稿會落在同一個 start → 前端能原地改字。
+                    start_time = speech_segment.start / 16000.0
                     
                     # 確保 ASR 模型已載入
                     if len(samples) > 0:
@@ -526,12 +946,10 @@ async def websocket_endpoint(websocket: WebSocket):
                                 init_whisper(source_lang)
                             else:
                                 init_sensevoice()
-                                
-                        stream = asr_recognizer.create_stream()
-                        stream.accept_waveform(16000, samples)
-                        asr_recognizer.decode_stream(stream)
-                        
-                        full_asr_text = stream.result.text
+
+                        # 走執行緒池，避免 1~3 秒音訊的解碼（40~200ms）把
+                        # 事件迴圈卡住、連帶拖慢後續音訊的接收。
+                        full_asr_text, lang_tag = await asr_decode_async(samples)
                         
                         if current_asr_engine == "whisper":
                             raw_text = full_asr_text.strip()
@@ -539,45 +957,66 @@ async def websocket_endpoint(websocket: WebSocket):
                             raw_text = clean_sense_voice_text(full_asr_text)
                         
                         if raw_text:
-                            # 偵測 ASR 識別語音標籤
-                            recognized_lang = "auto"
-                            if current_asr_engine == "whisper":
-                                if source_lang != "auto":
-                                    recognized_lang = source_lang
-                            else:
-                                if "<|zh|>" in full_asr_text or "<|yue|>" in full_asr_text:
-                                    recognized_lang = "zh"
-                                elif "<|en|>" in full_asr_text:
-                                    recognized_lang = "en"
-                                elif "<|ja|>" in full_asr_text:
-                                    recognized_lang = "ja"
-                                elif "<|ko|>" in full_asr_text:
-                                    recognized_lang = "ko"
+                            # 判定這句話該怎麼產出顯示文本（與臨時字幕共用同一份判斷）
+                            kind, payload, recognized_lang = plan_translation(
+                                raw_text, lang_tag, target_lang, source_lang, current_asr_engine
+                            )
 
-                            # 判定是否需要翻譯
-                            if target_lang == "none":
-                                # 僅顯示原文
-                                translated_text = raw_text
-                                print(f"ASR 識別 [{start_time:.2f}s] (僅顯示原文): {raw_text}")
-                            elif target_lang == recognized_lang:
-                                # 識別語言與目標翻譯語言一致，跳過翻譯
-                                translated_text = raw_text
-                                print(f"ASR 識別 [{start_time:.2f}s] (識別與目標一致 '{target_lang}'，跳過翻譯): {raw_text}")
-                            elif recognized_lang == "zh" and target_lang in ["zh-TW", "zh-CN"]:
-                                # 都是中文，使用本地 OpenCC
-                                if target_lang == "zh-TW":
-                                    translated_text = cc_s2t.convert(raw_text)
-                                    raw_text = translated_text  # 同步為繁體，方便前端去重
+                            if kind == "raw":
+                                translated_text = payload
+                                if target_lang == "none":
+                                    print(f"ASR 識別 [{start_time:.2f}s] (僅顯示原文): {raw_text}")
                                 else:
-                                    translated_text = cc_t2s.convert(raw_text)
-                                    raw_text = translated_text  # 同步為簡體
+                                    print(f"ASR 識別 [{start_time:.2f}s] (識別與目標一致 '{target_lang}'，跳過翻譯): {raw_text}")
+                            elif kind == "local":
+                                # 都是中文，使用本地 OpenCC
+                                translated_text = payload
+                                raw_text = translated_text  # 同步字形，方便前端去重
                                 print(f"ASR 識別 [{start_time:.2f}s] (中文本地 CC 轉換): {translated_text}")
                             else:
                                 # 進行翻譯
                                 print(f"ASR 識別 [{start_time:.2f}s] (目標語言 '{target_lang}'): {raw_text}")
-                                translated_text = await translate_text(
-                                    raw_text, target_lang, ollama_url, model_name, deepseek_key
-                                )
+                                seg_duration = len(samples) / 16000.0
+                                # 滾動模式下先墊上臨時譯文，避免定稿接手時字幕行閃成空白
+                                carry_zh = ""
+                                if (rolling_asr and rs["zh"]
+                                        and rs["start"] is not None
+                                        and abs(rs["start"] - start_time) < 1e-6):
+                                    carry_zh = rs["zh"]
+                                if stream_translate:
+                                    # ① 先送「開始」事件：前端立刻顯示原文 + 閃爍游標，
+                                    #    使用者不必盯著空白等翻譯完成。
+                                    await websocket.send_json({
+                                        "event": "subtitle_begin",
+                                        "text_raw": raw_text,
+                                        "text_zh": carry_zh,
+                                        "start": start_time,
+                                        "duration": seg_duration
+                                    })
+                                    translated_text = ""
+                                    # ② 邊產生邊推送累積譯文
+                                    async for partial in translate_text_stream(
+                                        raw_text, target_lang, ollama_url, model_name, deepseek_key
+                                    ):
+                                        translated_text = partial
+                                        await websocket.send_json({
+                                            "event": "subtitle_chunk",
+                                            "text_raw": raw_text,
+                                            "text_zh": partial,
+                                            "start": start_time,
+                                            "duration": seg_duration
+                                        })
+                                    if not translated_text:
+                                        # ③ 串流引擎一個字都沒吐（服務未啟動 / 不支援 SSE）
+                                        #    → 退回非串流，確保一定有字幕
+                                        print("  ➔ 串流翻譯無輸出，本句改用非串流路徑")
+                                        translated_text = await translate_text(
+                                            raw_text, target_lang, ollama_url, model_name, deepseek_key
+                                        )
+                                else:
+                                    translated_text = await translate_text(
+                                        raw_text, target_lang, ollama_url, model_name, deepseek_key
+                                    )
                                 print(f"翻譯結果: {translated_text}")
                             
                             # 傳回給前端外掛
@@ -588,6 +1027,12 @@ async def websocket_endpoint(websocket: WebSocket):
                                 "start": start_time,
                                 "duration": len(samples) / 16000.0
                             })
+
+                            # 定稿已送出，清掉本段的滾動狀態，避免殘留到下一段
+                            # （否則下一段的臨時字幕會先閃出上一段的譯文）
+                            rs["raw"] = ""
+                            rs["zh"] = ""
+                            rs["start"] = None
                             
                             # 寫入本機逐字稿存檔
                             if transcript_file_path:
@@ -611,8 +1056,15 @@ async def websocket_endpoint(websocket: WebSocket):
     except Exception as e:
         print(f"WebSocket 發生錯誤: {e}")
     finally:
+        # 斷線時把滾動迴圈收乾淨，否則它會繼續對已關閉的 websocket 送事件
+        try:
+            await settle_rolling()
+        except Exception:
+            pass
         active_connections = max(0, active_connections - 1)
-        import time
+        # 注意：這裡原本寫著 `import time`，會讓 time 變成此函式的區域變數，
+        # 連帶讓巢狀的 rolling_loop 讀不到它（NameError）。
+        # 模組頂端已有 import time，直接用即可。
         last_active_time = time.time()
         print(f"WebSocket 客戶端已中斷連線。當前連線數: {active_connections}")
 

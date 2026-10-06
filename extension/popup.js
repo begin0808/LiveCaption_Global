@@ -11,6 +11,8 @@ const uiLangInput = document.getElementById('ui-lang');
 const sourceLangInput = document.getElementById('source-lang');
 const targetLangInput = document.getElementById('target-lang');
 const showBilingualInput = document.getElementById('show-bilingual');
+const streamTranslateInput = document.getElementById('stream-translate');
+const rollingAsrInput = document.getElementById('rolling-asr');
 const bgColorInput = document.getElementById('bg-color');
 const textColorInput = document.getElementById('text-color');
 const fontSizeInput = document.getElementById('font-size');
@@ -39,6 +41,8 @@ const i18n = {
     labelTargetLang: '字幕翻譯語言',
     optTargetNone: '僅顯示原文',
     labelShowBilingual: '雙語對照模式 (Bilingual Mode)',
+    labelStreamTranslate: '串流輸出 (即時逐字顯示)',
+    labelRollingAsr: '滾動字幕 (邊說邊出，說完自動校正)',
     titleOllama: '本機翻譯設定 (Ollama)',
     labelOllamaUrl: 'Ollama 伺服器網址',
     labelModelName: '翻譯模型名稱',
@@ -52,7 +56,8 @@ const i18n = {
     optSizeMedium: '中 (Medium)',
     optSizeLarge: '大 (Large)',
     optSizeXlarge: '特大 (X-Large)',
-    labelHistoryLines: '歷史字幕保留行數',
+    labelHistoryLines: '字幕顯示模式',
+    optHistoryPanel: '提詞面板（保留全部歷史，可上下捲動回看）',
     optHistory0: '僅顯示最新單行 (0 行歷史)',
     optHistory1: '顯示最新 + 前 1 句 (1 行歷史)',
     optHistory2: '顯示最新 + 前 2 句 (2 行歷史)',
@@ -84,6 +89,8 @@ const i18n = {
     labelTargetLang: '字幕翻译语言',
     optTargetNone: '仅显示原文',
     labelShowBilingual: '双语对照模式 (Bilingual Mode)',
+    labelStreamTranslate: '流式输出 (即时逐字显示)',
+    labelRollingAsr: '滚动字幕 (边说边出，说完自动校正)',
     titleOllama: '本地翻译设置 (Ollama)',
     labelOllamaUrl: 'Ollama 服务器网址',
     labelModelName: '翻译模型名称',
@@ -97,7 +104,8 @@ const i18n = {
     optSizeMedium: '中 (Medium)',
     optSizeLarge: '大 (Large)',
     optSizeXlarge: '特大 (X-Large)',
-    labelHistoryLines: '历史字幕保留行数',
+    labelHistoryLines: '字幕显示模式',
+    optHistoryPanel: '提词面板（保留全部历史，可上下滚动回看）',
     optHistory0: '仅显示最新单行 (0 行历史)',
     optHistory1: '显示最新 + 前 1 句 (1 行历史)',
     optHistory2: '显示最新 + 前 2 句 (2 行历史)',
@@ -129,6 +137,8 @@ const i18n = {
     labelTargetLang: 'Subtitle Translation Language',
     optTargetNone: 'Original Only',
     labelShowBilingual: 'Bilingual Mode',
+    labelStreamTranslate: 'Streaming Output (typewriter)',
+    labelRollingAsr: 'Rolling Captions (live, auto-corrected)',
     titleOllama: 'Local Translation (Ollama)',
     labelOllamaUrl: 'Ollama Server URL',
     labelModelName: 'Translation Model Name',
@@ -142,7 +152,8 @@ const i18n = {
     optSizeMedium: 'Medium',
     optSizeLarge: 'Large',
     optSizeXlarge: 'X-Large',
-    labelHistoryLines: 'Subtitle History Lines',
+    labelHistoryLines: 'Subtitle Display Mode',
+    optHistoryPanel: 'Teleprompter panel (keep all history, scrollable)',
     optHistory0: 'Show latest only (0 history lines)',
     optHistory1: 'Show latest + 1 line (1 history line)',
     optHistory2: 'Show latest + 2 lines (2 history lines)',
@@ -174,6 +185,8 @@ const i18n = {
     labelTargetLang: '字幕翻訳言語',
     optTargetNone: '原文のみ表示',
     labelShowBilingual: '二言語表示モード',
+    labelStreamTranslate: 'ストリーミング出力 (逐次表示)',
+    labelRollingAsr: 'ローリング字幕 (発話中に表示・後で自動修正)',
     titleOllama: 'ローカル翻訳設定 (Ollama)',
     labelOllamaUrl: 'Ollama サーバー URL',
     labelModelName: '翻訳モデル名',
@@ -187,10 +200,11 @@ const i18n = {
     optSizeMedium: '中 (Medium)',
     optSizeLarge: '大 (Large)',
     optSizeXlarge: '特大 (X-Large)',
-    labelHistoryLines: '履歴字幕表示行수',
+    labelHistoryLines: '字幕表示モード',
+    optHistoryPanel: 'プロンプターパネル（全履歴を保持・スクロール可）',
     optHistory0: '最新の1行のみ (履歴なし)',
     optHistory1: '最新 + 前の1行 (履歴1行)',
-    optHistory2: '最新 + 前의2行 (履歴2行)',
+    optHistory2: '最新 + 前の2行 (履歴2行)',
     titleVad: '高度な音声セグメンテーション (VAD)',
     labelMinSilence: '無音判定時間:',
     labelMaxSpeech: '単句最大時間:',
@@ -219,6 +233,8 @@ const i18n = {
     labelTargetLang: '자막 번역 언어',
     optTargetNone: '원본만 표시',
     labelShowBilingual: '이중 언어 대조 모드',
+    labelStreamTranslate: '스트리밍 출력 (실시간 표시)',
+    labelRollingAsr: '롤링 자막 (말하는 중 표시, 자동 교정)',
     titleOllama: '로컬 번역 설정 (Ollama)',
     labelOllamaUrl: 'Ollama 서버 주소',
     labelModelName: '번역 모델 이름',
@@ -232,7 +248,8 @@ const i18n = {
     optSizeMedium: '중간 (Medium)',
     optSizeLarge: '크게 (Large)',
     optSizeXlarge: '아주 크게 (X-Large)',
-    labelHistoryLines: '이전 자막 표시 줄 수',
+    labelHistoryLines: '자막 표시 모드',
+    optHistoryPanel: '프롬프터 패널 (전체 기록 유지, 스크롤 가능)',
     optHistory0: '최신 한 줄만 표시 (0개 기록)',
     optHistory1: '최신 + 이전 1줄 표시 (1개 기록)',
     optHistory2: '최신 + 이전 2줄 표시 (2개 기록)',
@@ -290,6 +307,8 @@ function applyLanguage(lang) {
   document.getElementById('label-target-lang').textContent = getTranslation(lang, 'labelTargetLang');
   document.getElementById('opt-target-none').textContent = getTranslation(lang, 'optTargetNone');
   document.getElementById('label-show-bilingual').textContent = getTranslation(lang, 'labelShowBilingual');
+  document.getElementById('label-stream-translate').textContent = getTranslation(lang, 'labelStreamTranslate');
+  document.getElementById('label-rolling-asr').textContent = getTranslation(lang, 'labelRollingAsr');
   
   document.getElementById('title-ollama').textContent = getTranslation(lang, 'titleOllama');
   document.querySelector('label[for="ollama-url"]').textContent = getTranslation(lang, 'labelOllamaUrl');
@@ -311,9 +330,10 @@ function applyLanguage(lang) {
   
   document.querySelector('label[for="history-lines"]').textContent = getTranslation(lang, 'labelHistoryLines');
   const historyOptions = document.getElementById('history-lines').options;
-  historyOptions[0].textContent = getTranslation(lang, 'optHistory0');
-  historyOptions[1].textContent = getTranslation(lang, 'optHistory1');
-  historyOptions[2].textContent = getTranslation(lang, 'optHistory2');
+  historyOptions[0].textContent = getTranslation(lang, 'optHistoryPanel');
+  historyOptions[1].textContent = getTranslation(lang, 'optHistory0');
+  historyOptions[2].textContent = getTranslation(lang, 'optHistory1');
+  historyOptions[3].textContent = getTranslation(lang, 'optHistory2');
   
   document.getElementById('title-vad').textContent = getTranslation(lang, 'titleVad');
   updateVadLabels(lang);
@@ -324,8 +344,8 @@ function applyLanguage(lang) {
 // Load settings from storage
 chrome.storage.local.get([
   'ollamaUrl', 'modelName', 'deepseekKey', 'minSilence', 'maxSpeech',
-  'uiLang', 'sourceLang', 'targetLang', 'showBilingual',
-  'bgColor', 'textColor', 'fontSize', 'historyLines', 'asrEngine'
+  'uiLang', 'sourceLang', 'targetLang', 'showBilingual', 'streamTranslate', 'rollingAsr',
+  'bgColor', 'textColor', 'fontSize', 'historyLines', 'historyLinesMigrated', 'asrEngine'
 ], (result) => {
   if (result.ollamaUrl) {
     if (result.ollamaUrl === 'http://localhost:11434') {
@@ -340,11 +360,15 @@ chrome.storage.local.get([
   if (result.modelName) {
     modelNameInput.value = result.modelName;
   } else {
-    modelNameInput.value = 'qwen2.5:7b-instruct';
+    modelNameInput.value = 'qwen3:4b-instruct';
   }
   if (result.deepseekKey) deepseekKeyInput.value = result.deepseekKey;
   if (result.minSilence !== undefined) {
     minSilenceInput.value = result.minSilence;
+  } else {
+    // 实测：0.5s → 0.35s 可让「说完话到首字出现」的空档从 917ms 降到 667ms，
+    // 且 0.30s 以内的自然停顿不会被切分。0.5s 的旧默认值偏保守。
+    minSilenceInput.value = '0.35';
   }
   if (result.maxSpeech !== undefined) {
     maxSpeechInput.value = result.maxSpeech;
@@ -361,10 +385,30 @@ chrome.storage.local.get([
   } else {
     showBilingualInput.checked = true;
   }
+  // 串流輸出預設開啟：首字延遲從 300~500ms 降到 100~300ms，體感明顯更即時
+  if (result.streamTranslate !== undefined) {
+    streamTranslateInput.checked = result.streamTranslate;
+  } else {
+    streamTranslateInput.checked = true;
+  }
+  // 滾動字幕預設開啟：這是把首字延遲從「等說話人停頓」的 5~9 秒
+  // 拉低到約 1 秒的關鍵，關掉就退回原本的分段式字幕。
+  if (result.rollingAsr !== undefined) {
+    rollingAsrInput.checked = result.rollingAsr;
+  } else {
+    rollingAsrInput.checked = true;
+  }
   if (result.bgColor) bgColorInput.value = result.bgColor;
   if (result.textColor) textColorInput.value = result.textColor;
   if (result.fontSize) fontSizeInput.value = result.fontSize;
-  if (result.historyLines !== undefined) historyLinesInput.value = result.historyLines;
+  if (result.historyLines === undefined || (!result.historyLinesMigrated && String(result.historyLines) === '0')) {
+    // 一次性遷移：舊版預設值 0（僅顯示最新單行）從來不是主動選擇，
+    // 改用新預設「提詞面板」。想退回舊行為就把下拉框改回 0 —— 遷移只做一次，不會再覆蓋。
+    historyLinesInput.value = 'panel';
+    chrome.storage.local.set({ historyLines: 'panel', historyLinesMigrated: true });
+  } else {
+    historyLinesInput.value = String(result.historyLines);
+  }
   if (result.asrEngine) asrEngineInput.value = result.asrEngine;
 
   // Apply localization initially
@@ -384,10 +428,12 @@ const saveSettings = () => {
     sourceLang: sourceLangInput.value,
     targetLang: targetLangInput.value,
     showBilingual: showBilingualInput.checked,
+    streamTranslate: streamTranslateInput.checked,
+    rollingAsr: rollingAsrInput.checked,
     bgColor: bgColorInput.value,
     textColor: textColorInput.value,
     fontSize: fontSizeInput.value,
-    historyLines: parseInt(historyLinesInput.value),
+    historyLines: historyLinesInput.value,
     asrEngine: asrEngineInput.value
   };
   chrome.storage.local.set(settings);
@@ -434,6 +480,8 @@ uiLangInput.addEventListener('change', () => {
 sourceLangInput.addEventListener('change', saveSettings);
 targetLangInput.addEventListener('change', saveSettings);
 showBilingualInput.addEventListener('change', saveSettings);
+streamTranslateInput.addEventListener('change', saveSettings);
+rollingAsrInput.addEventListener('change', saveSettings);
 asrEngineInput.addEventListener('change', saveSettings);
 
 bgColorInput.addEventListener('input', saveSettings);

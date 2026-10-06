@@ -24,10 +24,11 @@ This system uses **real-time sentence-level streaming detection & translation te
    - **Advantage**: Does not occupy or interfere with system microphone or speakers. It will not record ambient room noise, typing sounds, or audio from other tabs, ensuring pristine audio input for the ASR engine.
 2. **Near Real-time Stream Processing (Dynamic ASR & VAD)**:
    - While playing a video, the browser slices audio and streams it to the Python backend in real-time using binary WebSockets.
-   - The backend runs an optimized local **Silero VAD (Voice Activity Detection)** model on the stream to dynamically chunk sentences (detecting short pauses, e.g., 0.5s silence). As soon as a sentence ends, it is immediately dispatched to the local **SenseVoice-Small** engine.
-   - **Experience**: Near-real-time sentence-level captions and translation (showing up about 100ms - 300ms after speech ends) instead of processing the video after it finishes.
+   - The backend runs an optimized local **Silero VAD (Voice Activity Detection)** model on the stream to dynamically chunk sentences (detecting short pauses, e.g., 0.35s silence). As soon as a sentence ends, it is immediately dispatched to the local **SenseVoice-Small** engine.
+   - **Rolling Re-recognition**: Captions appear without waiting for the speaker to pause. While speech is ongoing, the accumulated audio is re-decoded every 0.5 s; the interim result is shown immediately and overwritten in place by the final one once VAD closes the segment (the same model used by Zoom / Google Meet live captions). Because each pass re-decodes from the start, only the tail is unstable, so text never flickers or disappears.
+   - **Experience**: First-word latency drops from 5 - 9 s (waiting for a pause) to roughly 1 s. With Streaming Output enabled, the translation is also pushed out word by word, appearing about 100 - 300 ms after the sentence is finalized.
 3. **100% Offline & Privacy-First**:
-   - Supports a fully offline stack: ASR powered by local **Sherpa-ONNX**, and translation powered by local **Ollama** (Qwen 2.5 7B recommended for best quality, or 3B for faster speed and lower VRAM). All audio processing and text generation remain strictly on your local machine.
+   - Supports a fully offline stack: ASR powered by local **Sherpa-ONNX**, and translation powered by local **Ollama** (Qwen3 4B by default for a balance of speed and quality; switch to Qwen 2.5 7B for maximum quality). All audio processing and text generation remain strictly on your local machine.
 4. **Hot-Swappable Translation Engines**:
    - Supports OpenCC for local Traditional/Simplified Chinese conversion, local Ollama offline translation, online DeepSeek API, and a free Google Translate API fallback.
 
@@ -46,8 +47,11 @@ If you do not want to configure the Python development environment, you can down
 
 *   **Ultra-Low Latency Tab Audio Capture**: Uses a unique Chrome Extension tab audio loopback mechanism to precisely capture audio tracks playing in the active tab without affecting other system audio or recording devices.
 *   **Dual-Engine Offline Local AI Speech Recognition**: Powered by the Sherpa-ONNX architecture, integrating both **SenseVoice-Small** (ultra-fast recognition for Chinese, English, Japanese, Korean, and Cantonese) and **Whisper** (high-precision recognition for nearly 100 global languages such as French, German, Spanish, Italian, and Russian). Switch engines anytime based on the video content for barrier-free global video reading.
-*   **Flexible Translation Engines**: Supports the local **Ollama** framework (Qwen 2.5 7B recommended for best quality, or 3B for speed) for fully offline translation, as well as the online **DeepSeek** Cloud API for near-human quality translation.
+*   **Flexible Translation Engines**: Supports the local **Ollama** framework (Qwen3 4B by default for a balance of speed and quality; switch to Qwen 2.5 7B for maximum quality) for fully offline translation, as well as the online **DeepSeek** Cloud API for near-human quality translation.
+*   **Rolling Captions & Streaming Output**: With "Rolling Captions" enabled, there is no need to wait for a pause — interim captions appear while the speaker is still talking, cutting first-word latency from 5 - 9 s to about 1 s. Enable "Streaming Output" on top of that and the translation surfaces word by word, about 100 - 300 ms after the sentence is finalized.
 *   **Premium Glassmorphism Subtitle Window**: An elegant semi-transparent floating window overlay supporting custom font sizes and colors, mouse click-through, drag-and-drop repositioning, and double-click to reset.
+*   **Resizable Panel & Font Scaling**: Drag the bottom-right corner to resize the subtitle box freely (double-click to restore), and use `Ctrl` / `⌘` + scroll wheel to scale the font proportionally, so the panel no longer blocks the video.
+*   **Teleprompter Mode**: Switch the subtitle box into a teleprompter panel that keeps the full history (up to 300 lines) with free scrolling. Auto-follow pauses while you scroll back, and a "↓ Latest" button jumps straight to the newest line.
 *   **Multi-Line History Subtitle Scrolling**: Retains 0 to 2 lines of historical subtitles, fading and shrinking older lines upward to ensure you don't miss fast-paced speech.
 *   **100% Offline Privacy & Security**: All audio capture, speech recognition, translation, and rendering are done locally. No internet access is required, ensuring absolute privacy.
 
@@ -119,6 +123,22 @@ To modify the Python backend and package it into a `.exe` executable for Windows
    backend\.venv\Scripts\python.exe backend\build_release.py
    ```
 3. The packaged folder will be exported to `backend/dist/LiveCaptionServer/`. It is clean of caches and ready to be zipped.
+
+### Running the Tests
+
+After touching the translation flow or the caption logic, run the pure-logic unit tests first (**no model download, no Ollama, no GPU required**; finishes in about 2 seconds):
+
+```powershell
+backend\.venv\Scripts\python.exe backend\test_translation_logic.py
+```
+
+It covers the language routing inside `plan_translation` (pass-through / local OpenCC / external engine), system-prompt assembly, and the idempotency of the script conversion. On success it prints `=== [ALL PASSED] ===` and exits with code 0, so it can be dropped straight into CI.
+
+To measure end-to-end latency and the effect of rolling re-recognition, use this instead (requires models, Ollama and a test clip — the clip ships inside the model bundle):
+
+```powershell
+backend\.venv\Scripts\python.exe backend\test_rolling_e2e.py
+```
 
 ---
 

@@ -119,16 +119,18 @@ async function startCapture(streamId, tabId) {
     await chrome.storage.local.set({ isCapturing: true, activeTabId: tabId });
     
     // 3. Load config from storage
-    const storage = await chrome.storage.local.get(['ollamaUrl', 'modelName', 'deepseekKey', 'minSilence', 'maxSpeech', 'showBilingual', 'sourceLang', 'targetLang', 'asrEngine']);
+    const storage = await chrome.storage.local.get(['ollamaUrl', 'modelName', 'deepseekKey', 'minSilence', 'maxSpeech', 'showBilingual', 'sourceLang', 'targetLang', 'asrEngine', 'streamTranslate', 'rollingAsr']);
     const config = {
       ollamaUrl: (storage.ollamaUrl === 'http://localhost:11434' || !storage.ollamaUrl) ? 'http://127.0.0.1:11434' : storage.ollamaUrl,
-      modelName: (storage.modelName === 'qwen2.5:3b-instruct' || !storage.modelName) ? 'qwen2.5:7b-instruct' : storage.modelName,
+      modelName: storage.modelName || 'qwen3:4b-instruct',
       deepseekKey: storage.deepseekKey || '',
-      minSilence: storage.minSilence !== undefined ? storage.minSilence : 0.5,
+      minSilence: storage.minSilence !== undefined ? storage.minSilence : 0.35,
       maxSpeech: storage.maxSpeech !== undefined ? storage.maxSpeech : 6.0,
       sourceLang: storage.sourceLang || 'auto',
       targetLang: storage.targetLang || 'none',
-      asrEngine: storage.asrEngine || 'sensevoice'
+      asrEngine: storage.asrEngine || 'sensevoice',
+      streamTranslate: storage.streamTranslate !== false,
+      rollingAsr: storage.rollingAsr !== false
     };
     const showBilingual = storage.showBilingual !== false;
     

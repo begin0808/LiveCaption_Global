@@ -120,7 +120,8 @@ function connectWebSocket() {
   ws.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data);
-      if (data.event === 'subtitle') {
+      // 涵蓋 subtitle（最終結果）、subtitle_begin（開始）、subtitle_chunk（串流中間態）
+      if (typeof data.event === 'string' && data.event.startsWith('subtitle')) {
         // Forward ASR & translation subtitles to background worker
         chrome.runtime.sendMessage({
           target: 'background',
@@ -166,7 +167,9 @@ function sendConfigToBackend() {
       max_speech: config.maxSpeech,
       source_lang: config.sourceLang,
       target_lang: config.targetLang,
-      asr_engine: config.asrEngine
+      asr_engine: config.asrEngine,
+      stream_translate: config.streamTranslate !== false,
+      rolling_asr: config.rollingAsr !== false
     }));
   }
 }

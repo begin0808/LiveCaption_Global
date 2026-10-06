@@ -91,6 +91,19 @@
       <label for="show-bilingual" id="label-show-bilingual" style="margin: 0; cursor: pointer; font-size: 13px; font-weight: 600;">雙語對照模式 (Bilingual Mode)</label>
     </div>
 
+    <div class="input-group checkbox-wrapper">
+      <input type="checkbox" id="stream-translate" checked style="width: auto; margin: 0; cursor: pointer;">
+      <label for="stream-translate" id="label-stream-translate" style="margin: 0; cursor: pointer; font-size: 13px; font-weight: 600;">串流輸出 (即時逐字顯示)</label>
+    </div>
+
+    <div class="input-group checkbox-wrapper">
+      <input type="checkbox" id="rolling-asr" checked style="width: auto; margin: 0; cursor: pointer;">
+      <label for="rolling-asr" id="label-rolling-asr" style="margin: 0; cursor: pointer; font-size: 13px; font-weight: 600;">滾動字幕 (邊說邊出，說完自動校正)</label>
+    </div>
+    <div style="font-size: 11px; color: #888; margin: -6px 0 10px 0; line-height: 1.4;">
+      不等說話人停頓就先出字幕，首字延遲約 7 秒 → 1 秒。文字會在說完後被修正一次。
+    </div>
+
     <div class="section-title" id="title-ollama">本機翻譯設定 (Ollama)</div>
     <div class="input-group">
       <label for="ollama-url">Ollama 伺服器網址</label>
@@ -100,8 +113,9 @@
     <div class="input-group">
       <label for="model-name">翻譯模型名稱</label>
       <select id="model-name" style="cursor: pointer;">
-        <option value="qwen2.5:7b-instruct" selected>qwen2.5:7b-instruct</option>
-        <option value="qwen2.5:3b-instruct">qwen2.5:3b-instruct</option>
+        <option value="qwen3:4b-instruct" selected>qwen3:4b-instruct（推薦・速度快品質好）</option>
+        <option value="qwen2.5:3b-instruct">qwen2.5:3b-instruct（最快・偶爾加料）</option>
+        <option value="qwen2.5:7b-instruct">qwen2.5:7b-instruct（品質最佳・較慢）</option>
       </select>
     </div>
 
@@ -135,7 +149,8 @@
     <div class="input-group" style="margin-bottom: 16px;">
       <label for="history-lines">歷史字幕保留行數</label>
       <select id="history-lines" style="cursor: pointer;">
-        <option value="0" selected>僅顯示最新單行 (0 行歷史)</option>
+        <option value="panel" selected>提詞面板（保留全部歷史，可上下捲動回看）</option>
+        <option value="0">僅顯示最新單行 (0 行歷史)</option>
         <option value="1">顯示最新 + 前 1 句 (1 行歷史)</option>
         <option value="2">顯示最新 + 前 2 句 (2 行歷史)</option>
       </select>
@@ -143,8 +158,8 @@
 
     <div class="section-title" id="title-vad">進階語音切分設定 (VAD)</div>
     <div class="input-group">
-      <label for="min-silence">斷句靜音時間: <span id="min-silence-val">0.5</span> 秒</label>
-      <input type="range" id="min-silence" min="0.2" max="1.2" step="0.1" value="0.5" style="width: 100%; margin: 4px 0;">
+      <label for="min-silence">斷句靜音時間: <span id="min-silence-val">0.35</span> 秒</label>
+      <input type="range" id="min-silence" min="0.2" max="1.2" step="0.05" value="0.35" style="width: 100%; margin: 4px 0;">
     </div>
     <div class="input-group">
       <label for="max-speech">單句最長上限: <span id="max-speech-val">6.0</span> 秒</label>
